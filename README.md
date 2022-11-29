@@ -3,11 +3,11 @@ Automated long-read metagenomics workflow, using either PacBio HiFi or Nanopore 
 Mmlong2 is a continuation of [mmlong](https://github.com/SorenKarst/mmlong).
 
 **Note:** At the moment, mmlong2 is an in-house pipeline at Aalborg University Bioservers. A distributable version of the pipeline is scheduled for a future release.
-
+<br/>
+<br/>
 
 **Usage example for hybrid (Nanopore/Illumina) mode:** <br/>
 `./mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]`
-<br/>
 <br/>
 
 **Full usage:**
