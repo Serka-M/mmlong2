@@ -9,6 +9,7 @@ Mmlong2 is a continuation of [mmlong](https://github.com/SorenKarst/mmlong).
 **Usage example for hybrid (Nanopore/Illumina) mode:** <br/>
 `./mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]`
 <br/>
+<br/>
 
 **Full usage:**
 ```
