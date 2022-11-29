@@ -29,7 +29,7 @@ OPTIONAL INPUTS:
 -medaka_conf	Specify Medaka polishing model (default: r1041_e82_400bps_sup_g615)
 -medaka_conf2	Specify Medaka variant model (default: r1041_e82_400bps_sup_variant_g615)
 -cov		Space-sperated dataframe of additional read data to be used for binning (NP/PB/IL /path/to/reads.fastq)
--stop		Stop workflow after a specified stage completes: "assembly" "polishing" "metagenome-taxonomy" 
+-stop		Stop workflow after a specified stage completes:
 		"assembly" "polishing" "taxonomy" "binning" "qc" "annotation" "variants"
 
 EXTRA:
