@@ -28,7 +28,7 @@ OPTIONAL INPUTS:
 -medaka_rounds	Specify no. of Medaka polishing rounds (default: 1)
 -medaka_conf	Specify Medaka polishing model (default: r1041_e82_400bps_sup_g615)
 -medaka_conf2	Specify Medaka variant model (default: r1041_e82_400bps_sup_variant_g615)
--cov		Space-sperated dataframe of additional read data to be used for binning (NP/PB/IL /path/to/reads.fastq)
+-cov		Comma-sperated dataframe of additional read data to be used for binning (NP/PB/IL,/path/to/reads.fastq)
 -stop		Stop workflow after a specified stage completes:
 		"assembly" "polishing" "pre-binning" "binning" "qc" "annotation" "variants"
 
