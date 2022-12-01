@@ -7,7 +7,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 <br/>
 
 **Overview of mmlong2 workflow in Nanopore-only mode:**
-<img src="msc/np_workflow.svg" alt="pipeline-hybrid" style="zoom:100%;" />
+<img src="msc/np_workflow.svg" alt="mmlong2-np" style="zoom:100%;" />
 
 **Usage example for hybrid (Nanopore/Illumina) mode:** <br/>
 `./mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]`
