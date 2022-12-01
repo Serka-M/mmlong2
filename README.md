@@ -42,6 +42,10 @@ EXTRA:
 ```
 <br/>
 
+**Additional documentation:**
+*[Dataframe description](msc/mmlong2-dfs.md)
+*[Dependency list](msc/mmlong2-dep.md)
+
 **Comments:**
 * The workflow assumes that the input reads have been quality-filtered and adapter/barcode sequences have been trimmed off.
 * The workflow is long-read-based and requires either Nanopore or PacBio HiFi reads. It doesn't feature an Illumina-only mode.
