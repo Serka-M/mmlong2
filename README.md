@@ -43,8 +43,10 @@ EXTRA:
 <br/>
 
 **Additional documentation:**
-*[Dataframe description](msc/mmlong2-dfs.md)
-*[Dependency list](msc/mmlong2-dep.md)
+* [Dataframe description](msc/mmlong2-dfs.md)
+* [Dependency list](msc/mmlong2-dep.md)
+
+<br/>
 
 **Comments:**
 * The workflow assumes that the input reads have been quality-filtered and adapter/barcode sequences have been trimmed off.
