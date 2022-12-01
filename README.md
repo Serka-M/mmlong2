@@ -1,4 +1,4 @@
-<img src="msc/logo.PNG" alt="logo" style="zoom:100%;" />
+<img align="center" src="msc/logo.PNG" alt="logo" style="zoom:100%;" />
 Automated long-read metagenomics workflow, using either PacBio HiFi or Nanopore sequencing reads as input to generate characterized MAGs.
 The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst/mmlong).
 
