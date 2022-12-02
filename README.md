@@ -12,6 +12,13 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 **Overview of mmlong2 workflow in Nanopore-only mode:**
 <img src="msc/np_workflow.svg" alt="mmlong2-np" style="zoom:100%;" />
 
+**Quick-start:**
+```
+export PATH=$PATH:/projects/microflora_danica/mmlong2
+mmlong2 -h
+```
+<br/>
+
 **Usage example for hybrid (Nanopore/Illumina) mode:** <br/>
 `./mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]`
 <br/>
