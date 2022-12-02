@@ -60,7 +60,7 @@ EXTRA:
 * `<name>_contigs.tsv` - dataframe for metagenome contig metrics
 * `<name>_bins.tsv` - dataframe for automated binning results
 * `<name>_general.tsv` - workflow results, summarized into a single row
-* `bakta` - directory, containing annotation results for genome bins
+* `bakta` - directory, containing bins annotation results from [bakta](https://github.com/oschwengers/bakta)
 <br/>
 
 **Additional documentation:**
