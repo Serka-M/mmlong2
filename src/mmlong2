@@ -1,0 +1,1793 @@
+#!/bin/bash
+# DESCRIPTION: End-to-end long read metagenomics workflow, going from reads to characterised MAGs
+# AUTHOR: Mantas Sereika (mase@bio.aau.dk)
+# LICENSE: GNU General Public License
+#
+# It is assumed that input reads have been quality-filtered and adapter/barcode sequences trimmed off
+# The script relies on the Modules package and local conda environments to run the tools
+#
+# Result output explanation:
+# assembly.fasta - assembled and polished metagenome with contigs longer than 1 kb
+# assembly_graph.gfa - metagenome assembly graph, showing links between contigs
+# rRNA.fa - rRNA sequences, recovered from the polished metagenome
+# <name>_contigs.tsv - dataframe for metagenome contig metrics
+# <name>_bins.tsv - dataframe for automated binning results
+# <name>_general.tsv - workflow results summarized into a single row in TSV format
+# bins - direcotory for metagenome assembled genomes
+# bakta - directory, containing annotation results for genome bins
+
+# Pre-set default settings
+version="0.0.1"
+mode_workflow="Nanopore-only"
+stages_selected="OFF"
+extra_cov="OFF"
+stages_array=("OFF" "assembly" "polishing" "pre-binning" "binning" "qc" "annotation" "variants")
+dir_tmp=/projects/microflora_danica/mmlong2/tmp
+flye_cov=3
+flye_ovlp=0
+ROUNDS_RACON=0
+ROUNDS_MEDAKA=1
+MEDAKA_CONFIG="r1041_e82_400bps_sup_g615"
+MEDAKA_VAR_CONFIG="r1041_e82_400bps_sup_variant_g615"
+
+# Usage instructions for terminal interface
+usage_text="
+READ INPUTS: \n -np		Nanopore_reads.fastq \n -il		Illumina_reads.fastq \n -pb		PacBio_CCS_reads.fastq \n
+OPTIONAL INPUTS: \n -o		Output directory \n -tmp		Temporary file directory \n -t		Threads \n -flye_min_cov	Set read minimum coverage for Flye assembly (default: 3) \n -flye_min_ovlp	Set minimum read overlap for Flye assembly (default: 0/AUTO) \n -racon_rounds	Specify no. of Racon polishing rounds (default: $ROUNDS_RACON) \n -medaka_rounds	Specify no. of Medaka polishing rounds (default: $ROUNDS_MEDAKA) \n -medaka_conf 	Specify Medaka polishing model (default: $MEDAKA_CONFIG)
+ -medaka_conf2	Specify Medaka variant model (default: $MEDAKA_VAR_CONFIG) \n -cov		Comma-sperated dataframe of read datasets to be used for binning (NP/PB/IL,/path/to/reads.fastq) \n -stop		Stop workflow after a specified stage completes:\n		${stages_array[*]/$stages_selected} \n
+EXTRA: \n -h OR -help	Display help file \n -version	Display workflow version \n -info		Display information file \n \n"
+
+# Additional information for terminal interface
+info_text="
+ Long-read metagenomics workflow using either PacBio HiFi or Nanopore sequencing data.\n
+ Written by Mantas Sereika (mase@bio.aau.dk), 2022.\n
+ This program is free software: you can redistribute it and/or modify \n it under the terms of the GNU General Public License as published by \n the Free Software Foundation, either version 3 of the License, or \n (at your option) any later version. \n
+ This program is distributed in the hope that it will be useful, \n but WITHOUT ANY WARRANTY; without even the implied warranty of \n MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the \n GNU General Public License for more details:\n https://www.gnu.org/licenses/ \n
+ Center for Microbial Communities, Aalborg University, Denmark. \n \n"
+
+# Assign inputs
+while test $# -gt 0; do
+           case "$1" in
+                -help)
+                    printf -- "$usage_text"
+                    exit 1
+                    ;;
+                -h)
+                    printf -- "$usage_text"
+                    exit 1
+                    ;;
+                -info)
+                    printf -- "$info_text"
+                    exit 1
+                    ;;
+                -version)
+                    printf -- "$version \n"
+                    exit 1
+                    ;;
+                -np)
+                    shift
+                    reads_np=$1
+                    shift
+                    ;;
+                -il)
+                    mode_workflow="Nanopore-Illumina"
+                    shift
+                    reads_ilm=$1
+                    shift
+                    ;;
+                -pb)
+                    mode_workflow="PacBio_CCS"
+                    shift
+                    reads_pb=$1
+                    shift
+                    ;;
+                -t)
+                    shift
+                    threads=$1
+                    shift
+                    ;;
+                -o)
+                    shift
+                    dir_work=$1
+                    shift
+                    ;;
+                -tmp)
+                    shift
+                    dir_tmp=$1
+                    shift
+                    ;;
+                -flye_min_cov)
+                    shift
+                    flye_cov=$1
+                    shift
+                    ;;
+                -flye_min_ovlp)
+                    shift
+                    flye_ovlp=$1
+                    shift
+                    ;;
+                -racon_rounds)
+                    shift
+                    ROUNDS_RACON=$1
+                    shift
+                    ;;
+                -medaka_rounds)
+                    shift
+                    ROUNDS_MEDAKA=$1
+                    shift
+                    ;;
+                -medaka_conf)
+                    shift
+                    MEDAKA_CONFIG=$1
+                    shift
+                    ;;
+                -cov)
+                    shift
+                    extra_cov=$1
+                    shift
+                    ;;
+                -medaka_conf2)
+                    shift
+                    MEDAKA_VAR_CONFIG=$1
+                    shift
+                    ;;
+                -stop)
+                    shift
+                    stages_selected=$1
+                    shift
+                    ;;
+                *)
+                   printf "$1 is not a recognized input! \n Type --help for more information on script usage.\n"
+                   exit 1;
+                   ;;
+          esac
+  done  
+
+# Check early stoppage setting
+if [[ ! $stages_selected == "OFF" ]]
+then
+	if [[ " ${stages_array[@]} " =~ " ${stages_selected} " ]]
+	then
+         echo "Early stoppage set at: $stages_selected"
+	else
+	     echo "ERROR: unrecognized input for early stoppage. Aborting..."
+	     exit 1
+	fi
+fi
+
+# Set default number of threads
+if [ -z "$threads" ]
+then
+	threads=1
+fi
+
+# Check input for threads
+if [ $threads -gt $(nproc) ]
+then
+	echo "ERROR: More CPU threads allocated than available ($(nproc)). Aborting..."
+	exit 1
+else
+	echo ""
+	echo "Number of CPU threads set to $threads"
+fi
+
+# Check read input for Nanopore reads
+if [[ ! -f "$reads_np" ]] && [[ ! $mode_workflow == "PacBio_CCS" ]]
+then
+	echo "ERROR: input for Nanopore reads not found. Aborting..."
+	exit 1
+fi
+
+# Turn relative path into absolute for Nanopore reads
+if [[ ! "$reads_np" = /* ]] && [[ ! $mode_workflow == "PacBio_CCS" ]]
+then
+	reads_np="$(pwd)/$reads_np"
+fi
+
+# For hybrid mode, check Illumina read input
+if [ $mode_workflow == "Nanopore-Illumina" ]
+then
+
+# Check for  reads
+if [[ ! -f $reads_ilm ]] 
+then
+	echo "ERROR: missing Illumina reads. Aborting..."
+	exit 1
+fi
+
+# Turn relative path into absolute for Illumina reads
+if [[ ! "$reads_ilm" = /* ]]
+then
+	reads_ilm="$(pwd)/$reads_ilm"
+fi
+
+fi
+
+# For PacBio mode, check read input
+if [[ ! -f "$reads_pb" ]] && [[ $mode_workflow == "PacBio_CCS" ]]
+then
+	echo "ERROR: input for PacBio CCS reads not found. Aborting..."
+	exit 1
+fi
+
+# Turn relative path into absolute for reverse PacBio reads
+if [[ ! "$reads_pb" = /* ]] && [[ $mode_workflow == "PacBio_CCS" ]]
+then
+	reads_pb="$(pwd)/$reads_pb"
+fi
+
+# Terminal message about input and PacBio mode
+if [[ -f "$reads_pb" ]] && [[ $mode_workflow == "PacBio_CCS" ]]
+then
+	echo "WARNING: reads provided for PacBio CCS. Inputs for Nanopore and Illumina reads will be ignored."
+fi
+
+# Check if read list exists
+if [[ ! -f "$extra_cov" ]] && [[ ! $extra_cov == "OFF" ]]                            
+then
+	echo "ERROR: input for additional reads not found. Aborting..."
+	exit 1
+fi
+
+# Turn relative path into absolute for read list
+if [[ ! "$extra_cov" = /* ]] && [[ ! $extra_cov == "OFF" ]]  
+then
+	extra_cov="$(pwd)/$extra_cov"
+fi
+
+# Check the the reads list
+if [ ! $extra_cov == "OFF" ] 
+then
+
+count=0
+while read line || [ -n "$line" ]
+do
+	count=$(($count + 1))
+	type="$(echo $line | cut -f1 -d",")"
+	reads="$(echo $line | cut -f2 -d",")"
+	if [[ ! -f "$reads" ]]; then echo "ERROR: $reads not found. Aborting..." && exit 1; fi;
+	if [[ ! "$type" = "PB" ]] && [[ ! "$type" = "IL" ]] && [[ ! "$type" = "NP" ]]; then echo "ERROR: unrecognised input of $type for $reads. Aborting..." && exit 1; fi;
+done < $extra_cov
+
+fi
+
+# Turn relative path into absolute for temporary directory
+if [[ ! "$dir_tmp" = /* ]]
+then
+	dir_tmp="$(pwd)/$dir_tmp"
+fi
+
+# Create temporary directory
+if [ ! -d "$dir_tmp" ] 
+then
+    mkdir $dir_tmp
+fi
+
+# Validate temporary directory
+if [ ! -d "$dir_tmp" ] 
+then
+    echo "ERROR: Temporary file directory generation failed. Aborting..."
+	exit 1
+fi
+export TMPDIR=$dir_tmp
+
+# Configure path for output
+if [ -z "$dir_work" ]
+then
+	dir_work=$(pwd)
+else
+	if [[ ! "$dir_work" = /* ]]
+	then
+	     dir_work="$(pwd)/$dir_work"
+	fi
+fi
+
+# Create directory for output
+if [ ! -d "$dir_work" ] 
+then
+    mkdir $dir_work
+fi
+
+# Validate directory for output
+if [ ! -d "$dir_work" ] 
+then
+    echo "ERROR: Output directory generation failed. Aborting..." 
+	exit 1
+else
+	cd $dir_work
+fi
+
+# Validate input for polishing rounds
+if [ "$ROUNDS_RACON" -eq "$ROUNDS_RACON" ]  && [ "$ROUNDS_MEDAKA" -eq "$ROUNDS_MEDAKA" ]
+then
+	echo "Input for polishing settings verified"
+else
+    echo "ERROR: input for polishing rounds must be an integer. Aborting..." 
+	exit 1
+fi
+
+# Check free space at output directory
+bytes_left="$(df --output=avail -B 1 "$dir_work" | tail -n 1)"
+gigabytes_left=$(($bytes_left/1024**3))
+
+if [ $gigabytes_left -lt 100 ]
+then 
+	echo "ERROR: Less than 100 GB of free space left in Output directory. Aborting..."
+else
+	echo "$gigabytes_left GB of free space available in Output directory"
+fi
+
+# Create directory for wrokflow main result files 
+if [ -d "$dir_work/results" ] 
+then
+    echo "WARNING: Output results directory already exists" 
+else
+    mkdir $dir_work/results
+fi
+
+# Create directory for workflow secondary files
+if [ -d "$dir_work/tmp" ] 
+then
+    echo "WARNING: Output temporary files directory already exists" 
+else
+    mkdir $dir_work/tmp
+fi
+
+# Assign software — modules
+MODUL_BIOAWK=Bioawk/1.0-foss-2018a
+MODUL_MINIMAP2=minimap2/2.24-GCCcore-10.2.0
+MODUL_SAMTOOLS=SAMtools/1.14-GCC-10.2.0
+MODUL_RACON=Racon/1.5.0-GCCcore-10.2.0-claaudia-amd
+MODUL_BARRNAP=Barrnap/0.9-foss-2018a
+MODUL_MAXBIN=MaxBin/2.2.7-foss-2018a-Perl-5.26.1
+MODUL_CONDA=Miniconda3/4.9.2-foss-2019a
+MODUL_CHECKM=CheckM2/0.1.3-foss-2020b
+MODUL_GTDB=GTDB-Tk/2.1.0-foss-2020b
+
+# Assign software — local conda environments             
+dir_flye=/projects/microflora_danica/mmlong2/conda/Flye_2.9.1 
+dir_medaka=/projects/microflora_danica/mmlong2/conda/Medaka_1.7.2
+dir_kaiju=/projects/microflora_danica/mmlong2/conda/Kaiju_1.9.2
+dir_whokaryote=/projects/microflora_danica/mmlong2/conda/Whokaryote_0.0.1
+dir_metabat=/projects/microflora_danica/mmlong2/conda/MetaBat2_2.15
+dir_vamb=/projects/microflora_danica/mmlong2/conda/Vamb_3.0.9
+dir_metabinner=/projects/microflora_danica/mmlong2/conda/MetaBinner_1.4.4
+dir_das_tool=/projects/microflora_danica/mmlong2/conda/DasTool_1.1.5
+dir_coverm=/projects/microflora_danica/mmlong2/conda/CoverM_0.6.1
+dir_quast=/projects/microflora_danica/mmlong2/conda/Quast_5.2.0
+dir_gunc=/projects/microflora_danica/mmlong2/conda/Gunc_1.0.5
+dir_bakta=/projects/microflora_danica/mmlong2/conda/Bakta_1.6.0
+dir_nanoq=/projects/microflora_danica/mmlong2/conda/NanoQ_0.9.0
+
+# Assign software — local databases    
+dir_gunc_db=/projects/microflora_danica/mmlong2/db/gunc_1.0.5/gunc_db_progenomes2.1.dmnd
+dir_bakta_db=/projects/microflora_danica/mmlong2/db/bakta_1.6.0/db
+dir_kaiju_db=/projects/microflora_danica/mmlong2/db/kaiju_db_nr_2022-03-10
+db_silva=/projects/microflora_danica/mmlong2/db/SILVA_138_SSURef_NR99_tax_silva.udb
+
+# Make dataframe for software used
+echo "software,version" > $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_CONDA" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_flye)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_BIOAWK" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_MINIMAP2" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_SAMTOOLS" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_RACON" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_medaka)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_kaiju)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_whokaryote)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_BARRNAP" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr ' ' ',' <<<"$(usearch11 --version)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_metabat)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_MAXBIN" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_metabinner)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_vamb)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_das_tool)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_quast)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_CHECKM" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_gunc)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_GTDB" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_bakta)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_nanoq)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_coverm)")" >> $dir_work/tmp/dependencies.csv
+sed -i '/^$/d' $dir_work/tmp/dependencies.csv
+cp $dir_work/tmp/dependencies.csv $dir_work/results/dependencies.csv
+
+# Configure terminal message
+if [ $mode_workflow == "Nanopore-Illumina" ]
+then
+	read_input="\n\n Nanopore reads:		$reads_np \n Illumina reads:		$reads_ilm"
+fi
+
+if [ $mode_workflow == "Nanopore-only" ]
+then
+	read_input="\n\n Nanopore reads:		$reads_np"
+fi
+
+if [ $mode_workflow == "PacBio_CCS" ]
+then
+	read_input="\n\n PacBio CCS reads:		$reads_pb"
+	polishing_input="\n"
+else
+	polishing_input="\n Rounds of Racon polishing:	$ROUNDS_RACON \n Rounds of Medaka polishing:	$ROUNDS_MEDAKA \n Medaka polishing model:	$MEDAKA_CONFIG \n Medaka variant model:		$MEDAKA_VAR_CONFIG \n"
+fi
+
+# Terminal message to double-check all inputs
+printf "\n\nThe following settings will be used for metagenome assembly and processing: $read_input
+ Directory for output:		$dir_work \n Directory for temp files:	$dir_tmp \n Number of threads:		$threads \n Coverage cutoff for Flye:	$flye_cov \n Minimum overlap for Flye:	$flye_ovlp $polishing_input Early stoppage:		$stages_selected \n Extra reads for binning:	$extra_cov \n Workflow mode:			$mode_workflow \n"
+printf "\nAbort now, if settings are incorrect.\n\n"
+sleep 15s
+echo "Workflow started in $mode_workflow mode at $(date "+%Y-%m-%d %H:%M:%S") with $threads threads and $gigabytes_left GB of available space" >> $dir_work/tmp/log.txt
+
+# Set responses for manual script stoppage
+trap 'echo "Workflow manually cancelled at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt && exit 1' SIGTSTP 
+trap 'echo "Workflow manually cancelled at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt && exit 1' INT 
+
+
+########################################################################################################################################
+##################################################### Assembly with Flye ###############################################################
+########################################################################################################################################
+printf "\nSTAGE 1: Metagenome assembly\n"
+
+# Sanity check for Nanopore-based modes
+if [ ! $mode_workflow == "PacBio_CCS" ]
+then
+
+if [ -f $reads_np ]
+	then
+	filesize=$(stat -c%s "$reads_np")
+	if (( filesize > 1024 ))
+	then
+	    echo "Read input for assembly checked." 
+		module purge
+	else
+	    echo "ERROR: Nanopore reads for assembly found, but file size is lees than 1 KB. Aborting..." 
+		echo "Failure in validating read input for metagenome assembly at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+		exit 1
+	fi
+else
+	echo "ERROR: Nanopore reads for assembly not found. Aborting..."
+	echo "Failure in finding read input for metagenome assembly at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+fi
+
+# Sanity check for Pacbio mode
+if [ $mode_workflow == "PacBio_CCS" ]
+then
+	ROUNDS_RACON=0
+	ROUNDS_MEDAKA=0
+if [ -f $reads_pb ]
+	then
+	filesize=$(stat -c%s "$reads_pb")
+	if (( filesize > 1024 ))
+	then
+	    echo "Read input for assembly checked." 
+	else
+	    echo "ERROR: PacBio CCS reads for assembly found, but file size is lees than 1 KB. Aborting..." 
+		echo "Failure in validating read input for metagenome assembly at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+		exit 1
+	fi
+else
+	echo "ERROR: PacBio CCS reads for assembly not found. Aborting..."
+	echo "Failure in finding read input for metagenome assembly at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+fi
+
+# Flye assembly
+if [ -f "$dir_work/tmp/flye/assembly.fasta" ] 
+then
+    echo "WARNING: initial metagenome assembly already exists. Skipping..." 
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_flye > /dev/null 2>&1
+	
+	if [ $mode_workflow == "PacBio_CCS" ]; then flye_opt="--pacbio-hifi $reads_pb --min-overlap 7500 --read-error 0.01";
+	else flye_opt="--nano-hq $reads_np"; fi;
+
+	if [ $flye_ovlp -eq 0 ]; then flye_ovlp=""; else flye_ovlp="--min-overlap $flye_ovlp"; fi
+    flye $flye_opt --out-dir $dir_work/tmp/flye --threads $threads --meta $flye_ovlp --extra-params min_read_cov_cutoff=${flye_cov}                                    
+	cp -avr $dir_work/tmp/flye/assembly_graph.gfa $dir_work/results/assembly_graph.gfa
+	
+	echo "Flye assembly completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	source deactivate > /dev/null 2>&1
+fi
+
+# Early stoppage
+if [ $stages_selected == "assembly" ]
+then
+	echo "Workflow finished at the assembly stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the assembly stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+
+########################################################################################################################################
+################################################ Polishing with Racon and Medaka #######################################################
+########################################################################################################################################
+printf "\nSTAGE 2: Metagenome polishing\n"
+
+# Sanity check
+if [ -f "$dir_work/tmp/flye/assembly.fasta" ] 
+then
+	filesize=$(stat -c%s "$dir_work/tmp/flye/assembly.fasta")
+	if (( filesize > 1024 ))
+	then
+	    echo "Initial assembly checked." 
+	else
+	    "ERROR: initial assembly found, but file size is lees than 1 KB. Aborting..." 
+	    echo "Failure in metagenome assembly at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	    exit 1
+	fi
+else
+	echo "ERROR: initial assembly is missing. Aborting..." 
+	echo "Failure in metagenome assembly at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Create directory for polishing data
+if [ -d "$dir_work/tmp/polishing" ]
+then
+    echo "WARNING: directory for polishing data already exists" 
+else
+    mkdir $dir_work/tmp/polishing
+fi
+
+# For PacBio mode, create mock files to skip polishing
+if [ ! -f "$dir_work/tmp/polishing/assembly_polished_above1kb.fasta" ] && [[ $mode_workflow == "PacBio_CCS" ]]
+then
+	module load $MODUL_BIOAWK > /dev/null 2>&1
+	cp $dir_work/tmp/flye/assembly.fasta $dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta
+	cp $dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta $dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta
+	bioawk -c fastx '{ if(length($seq) > 1000) { print ">"$name; print $seq }}' $dir_work/tmp/flye/assembly.fasta > $dir_work/tmp/polishing/assembly_polished_above1kb.fasta
+	cp -avr $dir_work/tmp/polishing/assembly_polished_above1kb.fasta $dir_work/results/assembly.fasta
+	bioawk -c fastx '{ print $name, gc($seq)*100 }' $dir_work/tmp/polishing/assembly_polished_above1kb.fasta > $dir_work/tmp/polishing/contig_gc.tsv
+fi
+
+# Racon polishing
+function polish_racon {
+	assembly=$1
+	round=$2
+	echo "Starting round ${round}/$ROUNDS_RACON of Racon..."
+	minimap2  -I 50G -K 10G -t $threads -x map-ont $assembly $reads_np > $dir_work/tmp/polishing/racon_${round}.paf
+	racon --include-unpolished -m 8 -x -6 -g -8 -w 500 -t $threads  $reads_np $dir_work/tmp/polishing/racon_${round}.paf $assembly > $dir_work/tmp/polishing/racon_${round}.fasta
+	echo "Round ${round} of Racon for metagenome polishing completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	}
+
+if [ $ROUNDS_RACON -ge 1 ]
+then
+
+module load $MODUL_RACON > /dev/null 2>&1
+module load $MODUL_MINIMAP2 > /dev/null 2>&1
+
+for round in $(seq 1 $ROUNDS_RACON)
+do
+	if [ -f "$dir_work/tmp/polishing/racon_${round}.fasta" ]; then echo "Skipping round ${round} of Racon...";
+	else round_prev=$((${round} - 1)) 
+	if [ $round_prev -eq 0 ]; then assembly=$dir_work/tmp/flye/assembly.fasta; else assembly=$dir_work/tmp/polishing/racon_${round_prev}.fasta; fi
+	polish_racon ${assembly} ${round}; fi
+done
+
+else
+	if [ ! -f "$dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta" ]; then cp $dir_work/tmp/flye/assembly.fasta $dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta; fi
+fi
+
+# Output check for Racon final result
+if [ -f "$dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta" ]
+then
+	filesize=$(stat -c%s "$dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta")
+	if (( filesize > 1024 ))
+	then
+	    echo "Final output for Racon polishing verified at $(date "+%Y-%m-%d %H:%M:%S")"
+		echo "Final output for Racon polishing verified at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	else
+	    echo "ERROR: output from Racon polishing found, but file size is lees than 1 KB. Aborting..." 
+	    echo "Failure in Racon polishing at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	    exit 1
+	fi
+else
+	echo "ERROR: failure in Racon polishing. Aborting..." 
+	echo "Failure in Racon polishing at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Medaka polishing
+echo "$MEDAKA_CONFIG" > $dir_work/tmp/polishing/medaka_model.txt
+splits=$(($threads / 2))
+if [ $splits -gt 20 ]; then splits=20; fi;
+
+function polish_medaka {
+	assembly=$1
+	export round=$2
+	echo "Round $round/$ROUNDS_MEDAKA of Medaka:"
+	mkdir $dir_work/tmp/polishing/medaka_${round} && cd $dir_work
+	grep ">" $assembly | cut -c 2- | awk '{print $1}' > $dir_work/tmp/polishing/medaka_${round}/ids.txt
+	split -n l/$splits -d $dir_work/tmp/polishing/medaka_${round}/ids.txt $dir_work/tmp/polishing/medaka_${round}/contigs_id_
+
+	for file in $dir_work/tmp/polishing/medaka_${round}/contigs_id_*; do
+	     filename=$(basename $file) && filename+=_row
+	     awk 'BEGIN { ORS = " " } { print }' $file > $dir_work/tmp/polishing/medaka_${round}/$filename
+	done
+
+	mini_align -I 50G -i $reads_np -r $assembly -P -m -p $dir_work/tmp/polishing/medaka_${round}/calls_to_draft -t $threads
+	find $dir_work/tmp/polishing/medaka_${round} -type f -name "*_row" | xargs -i --max-procs=$splits bash -c 'MEDAKA_CONFIG=$(cat tmp/polishing/medaka_model.txt) && list=$(head -1 {}) && file=$(basename {}) && medaka consensus tmp/polishing/medaka_${round}/calls_to_draft.bam tmp/polishing/medaka_${round}/$file.hdf --model $MEDAKA_CONFIG --batch 200 --threads 2 --region $list'
+	medaka stitch $dir_work/tmp/polishing/medaka_${round}/*.hdf $assembly $dir_work/tmp/polishing/medaka_${round}/consensus.fasta --threads $splits
+	cp $dir_work/tmp/polishing/medaka_${round}/consensus.fasta $dir_work/tmp/polishing/medaka_${round}.fasta
+	echo "Round ${round} of Medaka for metagenome polishing completed at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Round ${round} of Medaka for metagenome polishing completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	}
+
+if [ $ROUNDS_MEDAKA -ge 1 ]
+then
+
+module load $MODUL_CONDA > /dev/null 2>&1
+source activate $dir_medaka > /dev/null 2>&1
+for round in $(seq 1 $ROUNDS_MEDAKA)
+do
+	if [ -f "$dir_work/tmp/polishing/medaka_${round}.fasta" ]; then echo "Skipping round ${round} of Medaka...";
+	else round_prev=$((${round} - 1)) 
+	if [ $round_prev -eq 0 ]; then assembly=$dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta; else assembly=$dir_work/tmp/polishing/medaka_${round_prev}.fasta; fi
+	echo "Medaka parallelism set at $splits" && echo "Medaka parallelism set at $splits" >> $dir_work/tmp/log.txt
+	polish_medaka ${assembly} ${round}; fi
+done
+source deactivate > /dev/null 2>&1
+
+else
+	if [ ! -f "$dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta" ]; then cp $dir_work/tmp/polishing/racon_${ROUNDS_RACON}.fasta $dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta; fi
+fi
+
+# Output check for Medaka final result
+if [ -f "$dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta" ]
+then
+	filesize=$(stat -c%s "$dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta")
+	if (( filesize > 1024 ))
+	then
+	    echo "Final output for Medaka polishing verified at $(date "+%Y-%m-%d %H:%M:%S")"
+		echo "Final output for Medaka polishing verified at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	else
+	    echo "ERROR: output from round 1 Medaka found, but file size is lees than 1 KB. Aborting..." 
+	    echo "Failure in Medaka round 1 at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	    exit 1
+	fi
+else
+	echo "ERROR: output from Medaka round 1 is missing. Aborting..." 
+	echo "Failure in Medaka round 1 at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Racon with Illumina reads
+if [ $mode_workflow == "Nanopore-Illumina" ]
+then
+
+# Prepare read input
+if [ -f "$dir_work/tmp/ilm_reads_merged.fastq" ] 
+then
+    echo "Illumina reads found for polishing." 
+else
+	echo "Processing Illumina reads..."
+	cp -avr $reads_ilm $dir_work/tmp/ilm_reads_merged.fastq
+fi
+
+# Generate polished assembly and remove contigs below 1kb
+if [ -f "$dir_work/tmp/polishing/assembly_polished_above1kb.fasta" ] 
+then
+    echo "Polished assembly found. Skipping..." 
+else
+	echo "Polishing metagenome with Illumina reads:"
+	
+	module load $MODUL_MINIMAP2 > /dev/null 2>&1
+	module load $MODUL_RACON > /dev/null 2>&1
+	
+    minimap2  -I 50G -K 10G -t $threads -x sr $dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta $dir_work/tmp/ilm_reads_merged.fastq > $dir_work/tmp/polishing/ilm.paf
+	racon --include-unpolished -t $threads $dir_work/tmp/ilm_reads_merged.fastq $dir_work/tmp/polishing/ilm.paf $dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta >  $dir_work/tmp/polishing/assembly_polished.fasta
+	
+	module load $MODUL_BIOAWK > /dev/null 2>&1
+	bioawk -c fastx '{ if(length($seq) > 1000) { print ">"$name; print $seq }}' $dir_work/tmp/polishing/assembly_polished.fasta > $dir_work/tmp/polishing/assembly_polished_above1kb.fasta
+	cp -avr $dir_work/tmp/polishing/assembly_polished_above1kb.fasta $dir_work/results/assembly.fasta
+	bioawk -c fastx '{ print $name, gc($seq)*100 }' $dir_work/tmp/polishing/assembly_polished_above1kb.fasta > $dir_work/tmp/polishing/contig_gc.tsv
+	
+	echo "Metagenome polishing with Illumina reads completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+fi
+
+# Finalize assembly for Nanopore-only mode
+if [ $mode_workflow == "Nanopore-only" ]
+then
+
+# Remove contigs below 1kb and get GC content
+if [ -f "$dir_work/tmp/polishing/assembly_polished_above1kb.fasta" ] 
+then
+    echo "Polished assembly found. Skipping..." 
+else
+	module load $MODUL_BIOAWK > /dev/null 2>&1
+	bioawk -c fastx '{ if(length($seq) > 1000) { print ">"$name; print $seq }}' $dir_work/tmp/polishing/medaka_${ROUNDS_MEDAKA}.fasta > $dir_work/tmp/polishing/assembly_polished_above1kb.fasta
+	cp -avr $dir_work/tmp/polishing/assembly_polished_above1kb.fasta $dir_work/results/assembly.fasta
+	bioawk -c fastx '{ print $name, gc($seq)*100 }' $dir_work/tmp/polishing/assembly_polished_above1kb.fasta > $dir_work/tmp/polishing/contig_gc.tsv
+	
+	echo "Metagenome polishing with Nanopore reads completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+fi
+
+# Early stoppage
+if [ $stages_selected == "polishing" ]
+then
+	echo "Workflow finished at the polishing stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the polishing stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+
+########################################################################################################################################
+######################################################### Automated contig binning #####################################################
+########################################################################################################################################
+printf "\nSTAGE 3: Automated binning\n"
+
+# Sanity check for polishing output
+if [ -f "$dir_work/tmp/polishing/assembly_polished_above1kb.fasta" ] 
+	then
+	filesize=$(stat -c%s "$dir_work/tmp/polishing/assembly_polished_above1kb.fasta")
+	if (( filesize > 1024 ))
+	then
+	    echo "Polished assembly found."
+	else
+	    "ERROR: polished assembly found, but file size is lees than 1 KB. Aborting..." 
+		echo "Failure in metagenome polishing at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	    exit 1
+	fi
+else
+	echo "ERROR: polished assembly is missing. Aborting..." 
+	echo "Failure in metagenome polishing at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Run Whokaryote and filter out eukaryotic contigs
+if [ -f "$dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta" ] 
+then
+    echo "Whokaryote classification results already exist. Skipping..." 
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_whokaryote > /dev/null 2>&1
+	whokaryote.py --contigs $dir_work/tmp/polishing/assembly_polished_above1kb.fasta --threads $threads --outdir $dir_work/tmp/whokaryote --minsize 1000
+	source deactivate > /dev/null 2>&1
+	
+	grep ">" $dir_work/tmp/polishing/assembly_polished_above1kb.fasta | sed 's/>//' | sort > $dir_work/tmp/whokaryote/contig_id.txt
+	sort $dir_work/tmp/whokaryote/eukaryote_contig_headers.txt > $dir_work/tmp/whokaryote/contig_euk.txt
+	comm -23 $dir_work/tmp/whokaryote/contig_id.txt $dir_work/tmp/whokaryote/contig_euk.txt > $dir_work/tmp/whokaryote/contigs_filt.txt
+	
+	module load $MODUL_SAMTOOLS > /dev/null 2>&1
+	xargs --arg-file=$dir_work/tmp/whokaryote/contigs_filt.txt samtools faidx $dir_work/tmp/polishing/assembly_polished_above1kb.fasta -o $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta
+	echo "Detection of eukaryotic sequences from metagenome with Whokaryote completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Sanity check for Whokaryote output
+if [ -f "$dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta" ] 
+	then
+	filesize=$(stat -c%s "$dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta")
+	if (( filesize > 1024 ))
+	then
+	    echo "Polished assembly found."
+	else
+	    "ERROR: polished assembly found, but file size is lees than 1 kb. Aborting..." 
+		echo "Failure in finding input for metagenome binning at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	    exit 1
+	fi
+else
+	echo "ERROR: polished assembly is missing. Aborting..." 
+	echo "Failure in finding input for metagenome binning at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Create directory for binning output
+if [ -d "$dir_work/tmp/binning" ] 
+then
+    echo "WARNING: directory for binning data already exists" 
+else
+    mkdir $dir_work/tmp/binning
+fi
+
+# Generate circular MAGs
+if [ -d "$dir_work/tmp/binning/bins_c" ] 
+then
+    echo "Skipping cMAG preparation..." 
+else
+	echo "Performing filtering of circular contigs..." 
+	module purge && module load $MODUL_SAMTOOLS > /dev/null 2>&1
+    mkdir $dir_work/tmp/binning/bins_c && cd $dir_work/tmp/binning/bins_c
+	mkdir cbins 
+	rsync -avr $dir_work/tmp/flye/assembly_info.txt . > /dev/null 2>&1
+	rsync -avr $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta . > /dev/null 2>&1
+	
+	awk -F "\t" '{ if (($2 >= 250000) && ($4 == "Y")) {print $1 "\t" "bin.c" ++i; next} }' assembly_info.txt > contig_cbin.tsv
+	if [ $(cat contig_cbin.tsv | wc -l) -ge 1 ]; then cat contig_cbin.tsv | xargs -i --max-procs=1 -n 2 bash -c 'samtools faidx assembly_polished_above1kb_filt.fasta $0 > cbins/$1.fa'; fi;
+	find cbins -name "bin.c*.fa" -type f -size -2k -delete
+	awk -F "\t" '{ if (($2 >= 250000) && ($4 == "Y")) {print $1 "\t"} }' assembly_info.txt > contigs_circ_vert.txt
+	awk -F "\t" '{ if ($4 == "Y") {print $1 "\t"} }' assembly_info.txt > contigs_circ_all_vert.txt
+	
+	awk -F "\t" '{ if ($4 == "N") {print $1} }' assembly_info.txt | awk 'BEGIN { ORS = " " } { print }' - > contigs_lin_horz.txt
+	xargs --arg-file=contigs_lin_horz.txt samtools faidx -c assembly_polished_above1kb_filt.fasta -o contigs_lin_filt_.fasta > /dev/null 2>&1
+	module load $MODUL_BIOAWK > /dev/null 2>&1 && bioawk -c fastx '{ if(length($seq) > 1000) { print ">"$name; print $seq }}' contigs_lin_filt_.fasta > contigs_lin_filt.fasta
+	cd $dir_work
+fi
+
+# Early stoppage
+if [ $stages_selected == "pre-binning" ]
+then
+	echo "Workflow finished at the pre-binning stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the pre-binning stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Create read list for binning
+if [ -f "$dir_work/tmp/binning/binning_input.csv" ] 
+then
+    echo "WARNING: read list for binning already exists" 
+else
+    if [ ! $mode_workflow == "PacBio_CCS" ]; then echo "NP,$reads_np" > $dir_work/tmp/binning/binning_input.csv;
+	else echo "PB,$reads_pb" > $dir_work/tmp/binning/binning_input.csv; fi;
+	
+	if [ $mode_workflow == "Nanopore-Illumina" ]; then echo "IL,$dir_work/tmp/ilm_reads_merged.fastq" >> $dir_work/tmp/binning/binning_input.csv; fi;
+	if [ ! $extra_cov == "OFF" ]; then cat $extra_cov >> $dir_work/tmp/binning/binning_input.csv; fi;
+fi
+
+# Prepare binning input
+module purge
+if [ -f "$dir_work/tmp/binning/catalogue.mmi" ]
+then
+	echo "Skipping binning input preparation..."
+else
+
+module load $MODUL_MINIMAP2 > /dev/null 2>&1
+module load $MODUL_SAMTOOLS > /dev/null 2>&1
+module load $MODUL_CONDA > /dev/null 2>&1
+
+mkdir $dir_work/tmp/binning/mapping_tmp
+mkdir $dir_work/tmp/binning/metabat_tmp
+mkdir $dir_work/tmp/binning/maxbin_tmp
+mkdir $dir_work/tmp/binning/metabinner_tmp
+	
+source activate $dir_vamb > /dev/null 2>&1
+concatenate.py $dir_work/tmp/binning/metagenome.cat $dir_work/tmp/binning/bins_c/contigs_lin_filt.fasta
+source deactivate > /dev/null 2>&1
+minimap2 -d $dir_work/tmp/binning/catalogue.mmi $dir_work/tmp/binning/metagenome.cat
+count=0
+
+source activate $dir_metabat > /dev/null 2>&1
+cat $dir_work/tmp/binning/binning_input.csv | while read line || [ -n "$line" ]
+do
+	count=$(($count + 1))
+	type="$(echo $line | cut -f1 -d",")"
+	reads="$(echo $line | cut -f2 -d",")"
+
+	if [ $type == "IL" ]; then mapping="sr" && ident=97;
+	elif [ $type == "NP" ]; then mapping="map-ont" && ident=85;
+	elif [ $type == "PB" ]; then mapping="map-hifi" && ident=97; fi;
+	
+	if [ ! -f $dir_work/tmp/binning/metabat_tmp/"${count}_metabat.tsv" ]
+	then 
+	
+	minimap2  -I 50G -K 10G -t $threads -ax $mapping $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta $reads | samtools view --threads $(($threads / 2)) -Sb -F 2308 - | samtools sort --threads $(($threads / 2)) - > $dir_work/tmp/binning/mapping_tmp/"${count}_cov.bam"
+	minimap2  -I 50G -K 10G -t $threads -N 50 -ax $mapping $dir_work/tmp/binning/catalogue.mmi $reads | samtools view -F 3584 -b --threads $(($threads / 2)) > $dir_work/tmp/binning/mapping_tmp/"${count}_vamb.bam"
+	
+	jgi_summarize_bam_contig_depths $dir_work/tmp/binning/mapping_tmp/"${count}_cov.bam" --percentIdentity $ident --outputDepth $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv"
+	cut -f1,3 $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" | tail -n+2 > $dir_work/tmp/binning/maxbin_tmp/"${count}_cov.tsv"
+	if [ "${count}_cov.tsv" == "1_cov.tsv" ]; then cp $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" $dir_work/tmp/binning/metabat_tmp/"${count}_metabat.tsv"; else cut -f4,5 $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" > $dir_work/tmp/binning/metabat_tmp/"${count}_metabat.tsv"; fi;
+	if [ "${count}_cov.tsv" == "1_cov.tsv" ]; then cut -f1,4 $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" > $dir_work/tmp/binning/metabinner_tmp/"${count}_metabinner.tsv"; else cut -f4 $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" > $dir_work/tmp/binning/metabinner_tmp/"${count}_metabinner.tsv"; fi;
+	
+	fi
+done
+source deactivate > /dev/null 2>&1
+
+paste -d "\t" $(ls -v $dir_work/tmp/binning/metabat_tmp/*_metabat.tsv) > $dir_work/tmp/binning/metabat_cov_full.tsv
+grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/binning/metabat_cov_full.tsv > $dir_work/tmp/binning/metabat_cov.tsv
+
+paste -d "\t" $(ls -v $dir_work/tmp/binning/metabinner_tmp/*_metabinner.tsv) > $dir_work/tmp/binning/metabinner_cov_full.tsv
+grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/binning/metabinner_cov_full.tsv > $dir_work/tmp/binning/metabinner_cov.tsv 
+
+cd $dir_work/tmp/binning
+find maxbin_tmp -type f -name "*cov.tsv" -printf '%f\n' | xargs -i --max-procs=$threads bash -c "grep -v -f bins_c/contigs_circ_all_vert.txt maxbin_tmp/{} > maxbin_tmp/filt_{}"
+find $dir_work/tmp/binning/maxbin_tmp/filt_*.tsv > $dir_work/tmp/binning/maxbin_list.txt
+
+cut -f1 $dir_work/tmp/binning/maxbin_tmp/filt_1_cov.tsv | awk 'BEGIN { ORS = " " } { print }' - > $dir_work/tmp/binning/bins_c/contigs_lin_horz_ord.txt
+xargs --arg-file=$dir_work/tmp/binning/bins_c/contigs_lin_horz_ord.txt samtools faidx $dir_work/tmp/binning/bins_c/contigs_lin_filt.fasta -o $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta > /dev/null 2>&1
+cd $dir_work
+
+fi
+
+# Perform automated binning with MetaBat2
+if [ -d "$dir_work/tmp/binning/metabat2" ] 
+then
+	bins_n=$(find $dir_work/tmp/binning/metabat2/* -name *fa | wc -l)
+else
+    mkdir $dir_work/tmp/binning/metabat2
+	bins_n=0
+fi
+
+if [ $bins_n -ge 1 ]
+then
+    echo "Found $bins_n bins for MetaBAT2. Skipping..." 
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_metabat > /dev/null 2>&1
+    metabat2 -i $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta -o $dir_work/tmp/binning/metabat2/metabat2 -a $dir_work/tmp/binning/metabat_cov.tsv -t $threads -s 500000
+	source deactivate > /dev/null 2>&1
+	bins_n=$(find $dir_work/tmp/binning/metabat2/* -name *fa | wc -l)
+	echo "$bins_n bins acquired with MetaBAT2 at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Perform automated binning with Maxbin2
+if [ -d "$dir_work/tmp/binning/maxbin2" ] 
+then
+	bins_n=$(find $dir_work/tmp/binning/maxbin2/* -name *fasta | wc -l)
+else
+    mkdir $dir_work/tmp/binning/maxbin2
+	bins_n=0
+fi
+
+if [ $bins_n -ge 1 ]
+then
+    echo "Found $bins_n bins for Maxbin2. Skipping..." 
+else
+	module load $MODUL_MAXBIN > /dev/null 2>&1
+    run_MaxBin.pl -contig $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta -abund_list $dir_work/tmp/binning/maxbin_list.txt -out $dir_work/tmp/binning/maxbin2/maxbin2 -thread $threads
+	bins_n=$(find $dir_work/tmp/binning/maxbin2/* -name *fasta | wc -l)
+	echo "$bins_n bins acquired with Maxbin2 at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Perform automated binning with MetaBinner
+if [ -d "$dir_work/tmp/binning/metabinner" ] 
+then
+	bins_n=$(find $dir_work/tmp/binning/metabinner/metabinner_res/ensemble_res/greedy_cont_weight_3_mincomp_50.0_maxcont_15.0_bins/ensemble_3logtrans/addrefined2and3comps/greedy_cont_weight_3_mincomp_50.0_maxcont_15.0_bins/* -name *fna | wc -l)
+else
+	bins_n=0
+fi
+
+if [ $bins_n -ge 1 ]
+then
+    echo "Found $bins_n bins for MetaBinner. Skipping..." 
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+    source activate $dir_metabinner > /dev/null 2>&1
+	
+	if [ ! -f $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord_kmer_4_f1000.csv ]; then python $dir_metabinner/bin/scripts/gen_kmer.py $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta 1000 4; fi;
+	bash $dir_metabinner/bin/run_metabinner.sh -a $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta -o $dir_work/tmp/binning/metabinner -d $dir_work/tmp/binning/metabinner_cov.tsv -k $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord_kmer_4_f1000.csv -p $dir_metabinner/bin -t $threads
+	
+	bins_n=$(find $dir_work/tmp/binning/metabinner/metabinner_res/ensemble_res/greedy_cont_weight_3_mincomp_50.0_maxcont_15.0_bins/ensemble_3logtrans/addrefined2and3comps/greedy_cont_weight_3_mincomp_50.0_maxcont_15.0_bins/* -name *fna | wc -l)
+	echo "$bins_n bins acquired with MetaBinner at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	source deactivate > /dev/null 2>&1
+fi
+
+# Perform automated binning with Vamb
+if [ -d "$dir_work/tmp/binning/vamb/bins" ] 
+then
+	bins_n=$(find $dir_work/tmp/binning/vamb/bins/* -name *fna | wc -l)
+    echo "Found $bins_n bins for Vamb. Skipping..." 
+else
+	n_contigs=$(grep ">" $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta | wc -l)
+	batch_size=$(($n_contigs / 20 - 1))
+
+	if [ $batch_size -lt 1 ]; then batch_size=1; fi;
+	if [ $batch_size -gt 125 ]; then batch_size=125; fi;
+	
+	echo "Batch size of $batch_size set for Vamb"
+	echo "Batch size of $batch_size set for Vamb" >> $dir_work/tmp/log.txt
+
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_vamb > /dev/null 2>&1
+	export OMP_NUM_THREADS=$threads
+	nice -n 19 bash -c "vamb --outdir $dir_work/tmp/binning/vamb --fasta $dir_work/tmp/binning/metagenome.cat --bamfiles $dir_work/tmp/binning/mapping_tmp/*_vamb.bam -o C --minfasta 500000 -t $batch_size"
+	source deactivate > /dev/null 2>&1
+	
+	bins_n=$(find $dir_work/tmp/binning/vamb/bins/* -name *fna | wc -l)
+	echo "$bins_n bins acquired with Vamb at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Create directory for DAS Tool output
+if [ -d "$dir_work/tmp/binning/das_tool" ] 
+then
+    echo "WARNING: directory for DAS Tool data already exists" 
+	bins_n=$(find $dir_work/tmp/binning/das_tool/output_DASTool_bins/* -name *fa | wc -l)
+else
+    mkdir $dir_work/tmp/binning/das_tool
+	bins_n=0
+fi
+
+# Refine the generated bins using DAS Tool
+if [ $bins_n -ge 1 ]
+then
+	echo "Found $bins_n bins for DAS Tool. Skipping..."
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_das_tool > /dev/null 2>&1
+	cd $dir_work/tmp/binning/das_tool
+	
+	# Get binner results
+	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/metabat2 -e fa > $dir_work/tmp/binning/das_tool/metabat2.tsv
+	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/maxbin2 -e fasta > $dir_work/tmp/binning/das_tool/maxbin2.tsv
+	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/vamb/bins -e fna > $dir_work/tmp/binning/das_tool/vamb.tsv
+	sed -i -e 's/S1C//' $dir_work/tmp/binning/das_tool/vamb.tsv
+	cp $dir_work/tmp/binning/metabinner/metabinner_res/metabinner_result.tsv $dir_work/tmp/binning/das_tool/metabinner.tsv
+
+	# Refine bins
+	DAS_Tool -i metabat2.tsv,maxbin2.tsv,vamb.tsv,metabinner.tsv -l MetaBAT2,MaxBin2,Vamb,MetaBinner -c $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta -o $dir_work/tmp/binning/das_tool/output -t $threads --search_engine diamond --write_bins
+	bins_n=$(find $dir_work/tmp/binning/das_tool/output_DASTool_bins/* -name *fa | wc -l)
+	echo "$bins_n refined bins selected with DAS Tool at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	
+	# Wrangle DAS Tool output
+	cp -r $dir_work/tmp/binning/das_tool/output_DASTool_bins $dir_work/tmp/binning/bins
+	if [ -d "$dir_work/tmp/binning/bins" ] 
+	then
+	     cd $dir_work/tmp/binning/bins
+	     find $dir_work/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | xargs rename 's/.*/our $i; sprintf("bin.%04d.fa", $i++)/e'
+		 cd $dir_work
+		 if [ -f $dir_work/tmp/binning/bins_c/cbins/*.fa ]; then rsync -avr $dir_work/tmp/binning/bins_c/cbins/*.fa $dir_work/tmp/binning/bins; fi
+		 Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/bins -e fa > $dir_work/tmp/binning/contig_bin.tsv
+		 cat $dir_work/tmp/binning/bins/*.fa > $dir_work/tmp/binning/contigs_binned.fasta
+		 rsync -r $dir_work/tmp/binning/bins $dir_work/results/.
+		 source deactivate > /dev/null 2>&1
+	else
+	     echo "ERROR: failure in bin refinement. Aborting..."
+		 source deactivate > /dev/null 2>&1
+		 exit 1
+	fi
+	
+fi
+
+# Early stoppage
+if [ $stages_selected == "binning" ]
+then
+	echo "Workflow finished at the binning stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the binning stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+
+########################################################################################################################################
+################################################################### Bin QC #############################################################
+########################################################################################################################################
+printf "\nSTAGE 4: Bin QC\n"
+
+# Sanity check for binning output
+bins_n=$(find $dir_work/tmp/binning/bins/* -name *fa | wc -l)
+if [ $bins_n -ge 1 ]
+then
+    echo "Procceding with QC of $bins_n bins." 
+else
+    echo "ERROR: no bins found. Aborting..."
+	echo "Failure in metagenome binning at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Run Quast
+if [ -f "$dir_work/tmp/binning/quast/transposed_report.tsv" ] 
+then
+    echo "Quast results file already exists. Skipping..." 
+else
+	module purge && module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_quast > /dev/null 2>&1
+	quast.py $dir_work/tmp/binning/bins/*.fa -o $dir_work/tmp/binning/quast -t  $threads --no-plots --no-html --no-icarus 
+	source deactivate > /dev/null 2>&1
+	echo "Bin feature metrics with Quast calculated at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Create directory for checkm output
+if [ -d "$dir_work/tmp/binning/checkm" ] 
+then
+    echo "WARNING: directory for CheckM output already exists" 
+else
+    mkdir $dir_work/tmp/binning/checkm
+fi
+
+# Run CheckM2
+if [ -f "$dir_work/tmp/binning/checkm/quality_report.tsv" ] 
+then
+    echo "CheckM results file already exists. Skipping..." 
+else
+	module purge && module load $MODUL_CHECKM > /dev/null 2>&1
+	export TMPDIR=$dir_tmp
+	export OPENBLAS_NUM_THREADS=1
+	export GOTO_NUM_THREADS=1
+	export OMP_NUM_THREADS=1
+	export NUMEXPR_MAX_THREADS=1
+	checkm2 predict -x .fa -i $dir_work/tmp/binning/bins -o $dir_work/tmp/binning/checkm -t $threads
+	echo "Bin quality estimates with CheckM completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Create directory for gunc output
+if [ -d "$dir_work/tmp/binning/gunc" ] 
+then
+    echo "WARNING: directory for Gunc output already exists" 
+else
+    mkdir $dir_work/tmp/binning/gunc
+fi
+
+# Run Gunc
+if [ -f "$dir_work/tmp/binning/gunc/GUNC.progenomes_2.1.maxCSS_level.tsv" ] 
+then
+    echo "Gunc results file already exists. Skipping..." 
+else
+	module purge && module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_gunc > /dev/null 2>&1
+	gunc run --db_file $dir_gunc_db --input_dir $dir_work/tmp/binning/bins --out_dir $dir_work/tmp/binning/gunc --threads $threads --temp_dir $dir_tmp
+	source deactivate > /dev/null 2>&1
+	echo "Bin contamination estimates with Gunc completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Early stoppage
+if [ $stages_selected == "qc" ]
+then
+	echo "Workflow finished at the bin QC and Taxonomy stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the bin QC and Taxonomy stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+
+########################################################################################################################################  
+######################################################### Contig/Bin annotation ########################################################
+########################################################################################################################################
+printf "\nSTAGE 5: Bin, contig annotation and classification\n"
+
+# Sanity check for binning output
+bins_n=$(find $dir_work/tmp/binning/bins/* -name *fa | wc -l)
+if [ $bins_n -ge 1 ]
+then
+    echo "Procceding with annotation of $bins_n bins." 
+else
+    echo "ERROR: no bins found. Aborting..."
+	echo "Failure in metagenome binning at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Create directory for Bakta output
+if [ -d "$dir_work/tmp/binning/bakta" ] 
+then
+    echo "WARNING: directory for Bakta output already exists" 
+else
+    mkdir $dir_work/tmp/binning/bakta
+fi
+bins_bakta_n=$(find $dir_work/tmp/binning/bakta -type f -name "bin*.gff3" | wc -l)
+
+# Run Bakta
+if [ $bins_bakta_n -ge 1 ]
+then
+    echo "Bakta output already exists for $bins_bakta_n bins. Skipping..." 
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_bakta > /dev/null 2>&1
+	export dir_bakta_db=$dir_bakta_db
+	cd $dir_work/tmp/binning
+	
+	splits=$(($threads / 5))
+	if [ $splits -gt 20 ]; then splits=20; fi;
+	echo "Bakta parallelism set at $splits"
+	echo "Bakta parallelism set at $splits" >> $dir_work/tmp/log.txt
+	find $dir_work/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | sed 's/...$//' | xargs -i --max-procs=$splits bash -c 'bakta --compliant --db $dir_bakta_db --prefix {} --locus {} --keep-contig-headers --output bakta/{} --tmp-dir /user_data/mase/general/tmp --threads 5 bins/{}.fa --skip-crispr'
+	echo "Bin annotation with Bakta completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	source deactivate > /dev/null 2>&1
+	cd $dir_work
+	bins_bakta_n=$(find $dir_work/tmp/binning/bakta -type f -name "bin*.gff3" | wc -l)
+	rsync -avr $dir_work/tmp/binning/bakta $dir_work/results/. > /dev/null 2>&1
+fi
+
+# Generate Bakta summary file
+if [ $bins_bakta_n -ge 1 ]
+then
+    if [ ! -f "$dir_work/tmp/binning/bakta.csv" ]
+	then
+	echo "bin,CDS_all,CDS_hyp,tRNA_all,tRNA_uniq,rRNA_16S,rRNA_23S,rRNA_5S" > $dir_work/tmp/binning/bakta_stats.csv
+	for file in $dir_work/tmp/binning/bakta/*; do
+	name=$(basename $file )
+	CDS_all=$(awk -F "\t" '{ if ($2 == "cds") {print $2} }' $file/${name}.tsv | grep -c "cds" -)
+	CDS_hyp=$(awk -F "\t" '{ if ($2 == "cds") {print $8} }' $file/${name}.tsv | grep -c "hypothetical protein" -)
+	tRNA_all=$(awk -F "\t" '{ if ($2 == "tRNA") {print $7} }' $file/${name}.tsv | sed 's/fMet_trna/Met_trna/' - | sed 's/Ile2_trna/Ile_trna/' - | grep -c "trna" -)
+	tRNA_uniq=$(awk -F "\t" '{ if ($2 == "tRNA") {print $7} }' $file/${name}.tsv | sed 's/fMet_trna/Met_trna/' - | sed 's/Ile2_trna/Ile_trna/' - | sort -u - | grep -c "trna" -)
+	rRNA_16S=$(awk -F "\t" '{ if ($7 == "16S_rrna") {print $2} }' $file/${name}.tsv | grep -c "rRNA" -)
+	rRNA_23S=$(awk -F "\t" '{ if ($7 == "23S_rrna") {print $2} }' $file/${name}.tsv | grep -c "rRNA" -)
+	rRNA_5S=$(awk -F "\t" '{ if ($7 == "5S_rrna") {print $2} }' $file/${name}.tsv | grep -c "rRNA" -)
+	echo "$name,$CDS_all,$CDS_hyp,$tRNA_all,$tRNA_uniq,$rRNA_16S,$rRNA_23S,$rRNA_5S" >> $dir_work/tmp/binning/bakta_stats.csv
+done
+	fi
+else
+	echo "ERROR: issue with running Bakta. Aborting..."
+	echo "Failure in bin annotation with Bakta at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Run GTDB-Tk
+if [ -f "$dir_work/tmp/binning/gtdb/classify/gtdbtk.bac120.summary.tsv" ] 
+then
+    echo "GTDB-tk results file already exist. Skipping..." 
+else
+    module purge
+	module load $MODUL_GTDB > /dev/null 2>&1
+    export TMPDIR=$dir_tmp
+	gtdbtk classify_wf --cpus $threads --genome_dir $dir_work/tmp/binning/bins --out_dir $dir_work/tmp/binning/gtdb --extension .fa
+	echo "Bin classification with GTDB-Tk completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	module purge
+fi
+
+# Create directory for kaiju output
+if [ -d "$dir_work/tmp/kaiju" ] 
+then
+    echo "WARNING: directory for taxonomy data already exists" 
+else
+    mkdir $dir_work/tmp/kaiju
+fi
+
+# Perform Kaiju taxonomy to refseq database
+if [ -f "$dir_work/tmp/kaiju/kaiju.out.names" ] 
+then
+    echo "Kaiju taxonomy results already exist. Skipping..." 
+else
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_kaiju > /dev/null 2>&1
+    kaiju -z $threads -t $dir_kaiju_db/nodes.dmp -f $dir_kaiju_db/kaiju_db.fmi -i $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta -o $dir_work/tmp/kaiju/kaiju.out
+	kaiju-addTaxonNames -r superkingdom,phylum,class,order,family,genus,species -t $dir_kaiju_db/nodes.dmp -n $dir_kaiju_db/names.dmp -i $dir_work/tmp/kaiju/kaiju.out -o $dir_work/tmp/kaiju/kaiju.out.names
+	kaiju2table -t $dir_kaiju_db/nodes.dmp -n $dir_kaiju_db/names.dmp -r phylum -o $dir_work/tmp/kaiju/kaiju_summary_phylum.tsv $dir_work/tmp/kaiju/kaiju.out
+	source deactivate > /dev/null 2>&1
+	echo "Taxonomic classification of contigs with Kaiju completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+	
+# Run barrnap
+if [ -f "$dir_work/results/rRNA.fa" ] 
+then
+    echo "Barrnap rRNA results already exist. Skipping..." 
+else
+	module load $MODUL_BARRNAP > /dev/null 2>&1
+    barrnap $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta --threads $threads --outseq $dir_work/results/rRNA.fa
+	echo "Recovery of rRNA sequences from metagenome with Barrnap completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Classify 16S rRNA
+if [ -f "$dir_work/tmp/silva_16s.tsv" ] 
+then
+    echo "16S rRNA classification results already exist. Skipping..." 
+else
+    grep -A1 ">16S" $dir_work/results/rRNA.fa > $dir_work/tmp/16s.fa
+	usearch11 -usearch_global $dir_work/tmp/16s.fa -db $db_silva -strand both -id 0.7 -maxaccepts 0 -maxrejects 0 -top_hit_only -threads $threads -blast6out $dir_work/tmp/silva_16s.tsv
+	echo "Classification of 16S rRNA sequences to Silva database completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Early stoppage
+if [ $stages_selected == "annotation" ]
+then
+	echo "Workflow finished at the metagenome annotation stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the metagenome annotation stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+
+########################################################################################################################################
+############################################################# Variant calling ##########################################################
+########################################################################################################################################
+printf "\nSTAGE 6: Variant calling\n"
+
+# Sanity check for data input
+if [ -f "$dir_work/tmp/binning/contigs_binned.fasta" ] 
+	then
+	filesize=$(stat -c%s "$dir_work/tmp/binning/contigs_binned.fasta")
+	if (( filesize > 1024 ))
+	then
+	    echo "Binned contigs found."
+	else
+	    "ERROR: binned contigs found, but file size is lees than 1 KB. Aborting..." 
+		echo "Failure in validating input for variant calling at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	    exit 1
+	fi
+else
+	echo "ERROR: binned contigs are missing. Aborting..." 
+	echo "Failure in validating input for variant calling at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Create a mock Medaka variant dataset for downstream compatibility with PacBio mode
+if [ $mode_workflow == "PacBio_CCS" ]
+then
+
+mkdir $dir_work/tmp/binning/medaka_var
+cd $dir_work/tmp/binning/medaka_var
+cut -f1 $dir_work/tmp/binning/metabat_tmp/1_metabat.tsv > contig.txt
+cut -f2 $dir_work/tmp/binning/contig_bin.tsv | sort | uniq > bin.txt
+
+R --slave --silent --args << 'Medaka_Mock'
+
+contig=read.delim("contig.txt", sep="\t", header=T)
+contig$medak_var_n <- 0
+write.table(contig,"medaka_var.csv", quote=F,row.names=FALSE, col.names=FALSE, sep = ",")
+
+bin=read.delim("bin.txt", sep="\t", header=F)
+colnames(bin)[1] <- "bin"
+bin$medak_var_n <- 0
+write.table(bin,"medaka_var_bins.tsv", quote=F, row.names=FALSE, col.names=TRUE, sep = "\t")
+
+Medaka_Mock
+
+cd $dir_work
+
+fi
+
+# Run Medaka variant calling workflow for binned contigs
+if [ -d "$dir_work/tmp/binning/medaka_var" ] 
+then
+    echo "WARNING: directory for Medaka variant output already exists" 
+else
+	module purge
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_medaka > /dev/null 2>&1
+	mkdir $dir_work/tmp/binning/medaka_var
+	cd $dir_work/tmp/binning/medaka_var
+	echo "$MEDAKA_VAR_CONFIG" > medaka_model.txt
+	cp $dir_work/tmp/polishing/assembly_polished_above1kb.fasta .
+	grep ">" $dir_work/tmp/binning/contigs_binned.fasta | cut -c 2- | awk '{print $1}' > ids.txt
+	
+	n_contigs=$(grep ">" $dir_work/tmp/binning/contigs_binned.fasta | wc -l)	
+	splits=$(($threads / 2))
+	if [ $splits -gt 60 ]; then splits=60; fi;
+	if [ $splits -gt $n_contigs ]; then splits=$n_contigs; fi;	
+	split -n l/$splits -d ids.txt contigs_id_
+	
+	for file in contigs_id_*; do
+	    filename=$(basename $file) && filename+=_row
+	    awk 'BEGIN { ORS = " " } { print }' $file > $filename
+	done
+	
+	mini_align -I 50G -i $reads_np -r assembly_polished_above1kb.fasta -m -p calls_to_draft -t $threads
+	find . -type f -name "*_row" | xargs -i --max-procs=20 bash -c 'MEDAKA_CONFIG=$(cat medaka_model.txt) && list=$(head -1 {}) && file=$(basename {}) && medaka consensus calls_to_draft.bam $file.hdf --model $MEDAKA_CONFIG --batch 200 --threads 2 --region $list'
+	
+	medaka variant assembly_polished_above1kb.fasta *.hdf medaka_var.vcf
+	cat medaka_var.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > medaka_var_sorted.vcf
+	#medaka tools annotate medaka_var_sorted.vcf assembly_polished_above1kb.fasta calls_to_draft.bam medaka_var_annot.vcf
+	
+	source deactivate > /dev/null 2>&1
+	cd $dir_work
+	echo "Variants with Medaka calculated at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Variants with Medaka calculated at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+fi
+
+# Summarise Medaka variant data
+if [ -f "$dir_work/tmp/binning/medaka_var/medaka_var_bins.tsv" ] 
+then
+    echo "WARNING: summary of Medaka variant data already exists" 
+else
+	cd $dir_work/tmp/binning/medaka_var
+	awk -F "\t" '{ if ($7 == "PASS") {print $1} }' medaka_var_sorted.vcf | uniq -c - | awk '{printf("%s,%s\n",$2,$1)}' - > medaka_var.csv
+	cp $dir_work/tmp/binning/contig_bin.tsv contig_bin.tsv
+
+R --slave --silent --args << 'medak_var_summary'
+
+medak=read.delim("medaka_var.csv", sep=",", header=F)
+bins=read.delim("contig_bin.tsv", sep="\t", header=F)
+
+colnames(medak) <- c("contig","medak_snv_n")
+colnames(bins) <- c("contig","bin")
+
+medak <- merge(medak, bins, by="contig")
+bins_snv <- aggregate(medak$medak_snv_n, by=list(Category=medak$bin), FUN=sum)
+colnames(bins_snv) <- c("bin","medak_var_n")
+write.table(bins_snv,"medaka_var_bins.tsv", quote=F, row.names=FALSE, col.names=TRUE, sep = "\t")
+
+medak_var_summary
+
+	cd $dir_work
+fi
+
+# Sanity check
+if [[ ! -f $dir_work/tmp/binning/medaka_var/medaka_var_bins.tsv ]]
+then
+	echo "ERROR: issue with summarising Medaka variant data. Aborting..."
+	echo "Failure in summarising Medaka variant data at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Early stoppage
+if [ $stages_selected == "variants" ]
+then
+	echo "Workflow finished at the variant calculation stage at $(date "+%Y-%m-%d %H:%M:%S")"
+	echo "Workflow finished at the variant calculation stage at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+
+########################################################################################################################################
+################################################## Data aggregation and summarization ##################################################
+########################################################################################################################################
+printf "\nSTAGE 7: Result summary\n"
+module purge
+
+# Create directory for data processing
+if [ -d "$dir_work/tmp/processing" ] 
+then
+    echo "WARNING: directory for result processing already exists" 
+else
+    mkdir $dir_work/tmp/processing
+fi
+
+# Get file for workflow details
+echo "$(basename $dir_work),$(date "+%Y-%m-%d"),$mode_workflow" > $dir_work/tmp/processing/name.txt
+
+# Get long read data summary
+module load $MODUL_CONDA > /dev/null 2>&1
+source activate $dir_nanoq > /dev/null 2>&1
+
+if [ -f "$dir_work/tmp/processing/nanoq_reads_long.ssf" ] 
+then
+    echo "Summary of long read data already exists. Skipping..." 
+else
+    echo "num_reads_long bp_total_long N50_long longest_reads_long shortest_read_long mean_length_long median_length_long mean_q_long median_q_long" > $dir_work/tmp/processing/nanoq_reads_long.ssf
+	
+	if [ ! $mode_workflow == "PacBio_CCS" ]
+	then
+	     nanoq -s -i $reads_np &>> $dir_work/tmp/processing/nanoq_reads_long.ssf
+	else
+	     nanoq -s -i $reads_pb &>> $dir_work/tmp/processing/nanoq_reads_long.ssf
+	fi
+	
+fi
+
+# For long-read-only modes, add blank values for Illumina read data
+if [ ! $mode_workflow == "Nanopore-Illumina" ]
+then
+	echo "num_reads_ilm bp_total_ilm N50_ilm longest_reads_ilm shortest_read_ilm mean_length_ilm median_length_ilm mean_q_ilm median_q_ilm" > $dir_work/tmp/processing/nanoq_reads_ilm.ssf
+	echo "0 0 0 0 0 0 0 0 0" >> $dir_work/tmp/processing/nanoq_reads_ilm.ssf
+fi
+
+# Get Illumina read data summary
+if [ -f "$dir_work/tmp/processing/nanoq_reads_ilm.ssf" ] 
+then
+    echo "Skipping summary of short read data..." 
+else
+    echo "num_reads_ilm bp_total_ilm N50_ilm longest_reads_ilm shortest_read_ilm mean_length_ilm median_length_ilm mean_q_ilm median_q_ilm" > $dir_work/tmp/processing/nanoq_reads_ilm.ssf
+	nanoq -s -i $dir_work/tmp/ilm_reads_merged.fastq &>> $dir_work/tmp/processing/nanoq_reads_ilm.ssf
+fi
+source deactivate > /dev/null 2>&1
+
+# Bin coverage and relative abundance values
+module load $MODUL_CONDA > /dev/null 2>&1
+source activate $dir_coverm > /dev/null 2>&1
+
+if [ -f "$dir_work/tmp/processing/bin_abund_long.tsv" ] 
+then
+    echo "Skipping bin coverage calculations with long read data..." 
+else
+	coverm genome -b $dir_work/tmp/binning/mapping_tmp/1_cov.bam -d $dir_work/tmp/binning/bins -x fa -m mean -o $dir_work/tmp/processing/bin_cov_long.tsv
+	coverm genome -b $dir_work/tmp/binning/mapping_tmp/1_cov.bam -d $dir_work/tmp/binning/bins -x fa -m relative_abundance -o $dir_work/tmp/processing/bin_abund_long.tsv
+fi
+
+if [ $mode_workflow == "Nanopore-Illumina" ]
+then
+
+if [ -f "$dir_work/tmp/processing/bin_abund_short.tsv" ] 
+then
+    echo "Skipping bin coverage calculations with short read data..." 
+else
+	coverm genome -b $dir_work/tmp/binning/mapping_tmp/2_cov.bam -d $dir_work/tmp/binning/bins -x fa -m mean -o $dir_work/tmp/processing/bin_cov_short.tsv
+	coverm genome -b $dir_work/tmp/binning/mapping_tmp/2_cov.bam -d $dir_work/tmp/binning/bins -x fa -m relative_abundance -o $dir_work/tmp/processing/bin_abund_short.tsv
+fi
+
+else
+	cut -f1 $dir_work/tmp/processing/bin_cov_long.tsv | sed 's/$/\t0/' > $dir_work/tmp/processing/bin_cov_short.tsv
+	cut -f1 $dir_work/tmp/processing/bin_abund_long.tsv | sed 's/$/\t0/' > $dir_work/tmp/processing/bin_abund_short.tsv
+fi
+source deactivate > /dev/null 2>&1
+
+# Put existing results in one directory
+cp $dir_work/tmp/flye/assembly_info.txt $dir_work/tmp/processing
+cp $dir_work/tmp/polishing/contig_gc.tsv $dir_work/tmp/processing
+cp $dir_work/tmp/kaiju/kaiju.out.names $dir_work/tmp/processing
+cp $dir_work/tmp/binning/contig_bin.tsv $dir_work/tmp/processing
+cp $dir_work/tmp/binning/gtdb/classify/gtdbtk.bac120.summary.tsv $dir_work/tmp/processing
+cp $dir_work/tmp/silva_16s.tsv $dir_work/tmp/processing
+cp $dir_work/tmp/binning/medaka_var/medaka_var_bins.tsv $dir_work/tmp/processing
+cp $dir_work/tmp/binning/medaka_var/medaka_var.csv $dir_work/tmp/processing
+cp $dir_work/tmp/binning/bakta_stats.csv $dir_work/tmp/processing
+
+cut -f1,14,15,16,17,18,20,23 $dir_work/tmp/binning/quast/transposed_report.tsv | sed 1d - > $dir_work/tmp/processing/quast.tsv
+cut -f1,2,3 $dir_work/tmp/binning/checkm/quality_report.tsv | sed 1d - > $dir_work/tmp/processing/checkm.tsv
+cut -f1,9,13 $dir_work/tmp/binning/gunc/GUNC.progenomes_2.1.maxCSS_level.tsv > $dir_work/tmp/processing/gunc.tsv
+
+# First checkpoint for file processing
+files_count=$(ls $dir_work/tmp/processing | wc -l)
+if [ $files_count -eq 19 ]                                                                                                                           
+then
+    echo "Initating processing of results from previous stages..."
+	echo "Input for data aggregation found at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+else
+	echo "ERROR: aggregation of result files from previous stages failed (Check 1/2). Aborting..." 
+	echo "Failure in aggregating data from previous stages at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Get assembly result summary
+contig_sum=$(grep '	Total length:	' $dir_work/tmp/flye/flye.log | sed 's/Total length://g') 
+contig_count=$(grep '	Fragments:	' $dir_work/tmp/flye/flye.log | sed 's/Fragments://g') 
+contig_n50=$(grep '	Fragments N50:	' $dir_work/tmp/flye/flye.log | sed 's/Fragments N50://g')
+contig_cov=$(grep '	Mean coverage:	' $dir_work/tmp/flye/flye.log | sed 's/Mean coverage://g') 
+contig_aln=$(grep 'Aligned read sequence' $dir_work/tmp/flye/flye.log | sed 's/.*(//g' | sed 's/)//g') 
+
+echo "assembly_size_bp,assembly_contigs_n,assembly_contigs_N50_bp,assembly_contigs_meanCOV,assembly_reads_mapped" > $dir_work/tmp/processing/assembly.csv
+echo "$contig_sum,$contig_count,$contig_n50,$contig_cov,$contig_aln" >> $dir_work/tmp/processing/assembly.csv
+
+tr -d '#' < $dir_work/tmp/processing/assembly_info.txt > $dir_work/tmp/processing/assembly_info_tr.txt
+rm $dir_work/tmp/processing/assembly_info.txt
+
+if [ -f "$dir_work/tmp/binning/gtdb/classify/gtdbtk.ar53.summary.tsv" ]                                                                                   
+then
+    cp $dir_work/tmp/binning/gtdb/classify/gtdbtk.ar53.summary.tsv $dir_work/tmp/processing
+	sed -i '1d' $dir_work/tmp/processing/gtdbtk.ar53.summary.tsv
+	cat $dir_work/tmp/processing/gtdbtk.bac120.summary.tsv $dir_work/tmp/processing/gtdbtk.ar53.summary.tsv > $dir_work/tmp/processing/gtdbtk.tsv
+	rm $dir_work/tmp/processing/gtdbtk.ar53.summary.tsv
+	rm $dir_work/tmp/processing/gtdbtk.bac120.summary.tsv
+else
+	mv $dir_work/tmp/processing/gtdbtk.bac120.summary.tsv $dir_work/tmp/processing/gtdbtk.tsv
+fi
+
+cd $dir_work/tmp/processing
+
+# For long-read-only modes, make the coverage file compatible with dataframe merging
+if [ $mode_workflow == "Nanopore-Illumina" ]
+then
+
+paste -d "\t" $dir_work/tmp/binning/metabat_tmp/1_metabat.tsv $dir_work/tmp/binning/metabat_tmp/2_metabat.tsv > $dir_work/tmp/processing/cov.tsv
+
+else
+
+cp $dir_work/tmp/binning/metabat_tmp/1_metabat.tsv $dir_work/tmp/processing/cov.tsv
+
+R --slave --silent --args << 'Cov_fix'
+
+cov=read.delim("cov.tsv", sep="\t", header=T)
+cov$cov_ilm=0
+cov$cov_ilm_var=0
+write.table(cov,"cov.tsv", quote=F,row.names=FALSE, col.names=TRUE, sep = "\t")
+
+Cov_fix
+
+fi
+
+# Second checkpoint for file processing
+files_count=$(ls $dir_work/tmp/processing | wc -l)
+if [ $files_count -eq 21 ]                                                                                                                      
+then
+    echo "Proceeding to dataframe generation..." 
+else
+	echo "ERROR: processing of result files from previous stages failed (Check 2/2). Aborting..." 
+	echo "Failure in wrangling data from previous stages at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Merge results into dataframes using R. For compatibility reasons, R packages are not used.
+# For the dataframe generation to fully complete, at least 2 MAGs have to be generated (bin-contig links) and at least one has to be classified as bacterial by GTDB-tk
+R --slave --silent --args << 'Generate_Dataframes'
+
+# Load and wrangle general bin, contig, read datasets
+name=read.delim(file="name.txt", sep=",", header=F)
+
+bin_contig=read.delim("contig_bin.tsv", sep="\t", header=F)
+colnames(bin_contig) <- c("contig","bin")
+
+assembly_info=read.delim("assembly_info_tr.txt", sep="\t", header=T)
+assembly_info=assembly_info[,c(1,4,5,8)]
+colnames(assembly_info) <- c("contig","status_circular","status_repeat","graph_path")
+
+contig_gc=read.delim("contig_gc.tsv", sep="\t", header=F)
+contig_gc=contig_gc[,c(1,2)]
+colnames(contig_gc) <- c("contig","GC")
+
+coverage=read.delim("cov.tsv", sep="\t", header=T)
+coverage[,3]<-NULL
+colnames(coverage) <- c("contig","contig_len_bp","cov_long","cov_long_var","cov_ilm","cov_ilm_var")
+
+assembly_general=read.delim("assembly.csv", sep=",", header=T)
+ilm_general=read.delim("nanoq_reads_ilm.ssf", sep=" ", header=T)
+np_general=read.delim("nanoq_reads_long.ssf", sep=" ", header=T)
+
+bakta=read.delim("bakta_stats.csv", sep=",", header=T)
+
+# Load and wrangle Quast, CheckM, Gunc, GTDB-tk and Medaka variant data
+quast=read.delim("quast.tsv", sep="\t", header=F)
+colnames(quast) <- c("bin","contigs","Longest_contig_bp","Genome_size_bp","GC","N50_bp","auN","N_per_100kb")
+
+checkm=read.delim("checkm.tsv", sep="\t", header=F)
+colnames(checkm) <- c("bin","Completeness","Contamination")
+
+gunc=read.delim("gunc.tsv", sep="\t", header=T)
+colnames(gunc) <- c("bin","gunc_contamination","gunc_status")
+
+gtdb=read.delim("gtdbtk.tsv", sep="\t", header=T)
+gtdb=gtdb[,c(1,2,6,7,8,11,12,17,19,20)]
+colnames(gtdb)[1] <- "bin"
+colnames(gtdb)[2] <- "gtdb_classification"
+colnames(gtdb)[10] <- "gtdb_warning"
+
+medak_bins=read.delim("medaka_var_bins.tsv", sep="\t", header=T)
+medak_contigs=read.delim("medaka_var.csv", sep=",", header=F)
+colnames(medak_contigs) <- c("contig","medak_var_n")
+
+# Wrangle Silva taxonomy data 
+silva=read.delim("silva_16s.tsv", sep="\t", header=F)
+silva=cbind(silva, data.frame(do.call('rbind', strsplit(as.character(silva$V1),':',fixed=TRUE))))
+silva=silva[c("X3","V2","V3")]
+colnames(silva) <- c("contig","silva_16s","identity")
+silva=merge(silva,bin_contig, by="contig")
+silva$bin <- as.factor(silva$bin)
+silva <- do.call(rbind, lapply(split(silva,silva$bin), function(x) {return(x[which.max(x$identity),])}))
+silva <- silva[c("bin","silva_16s")]
+colnames(silva) <- c("bin","silva_taxonomy")
+silva <- silva[!duplicated(silva$bin),]
+
+# Load and wrangle Kaiju data
+kaiju=read.delim("kaiju.out.names", sep="\t", header=F)
+kaiju=kaiju[(kaiju$V1 == "C"), ]
+kaiju=cbind(kaiju, data.frame(do.call('rbind', strsplit(as.character(kaiju$V4),';',fixed=TRUE))))
+kaiju=kaiju[c("V2","X1","X2","X3","X4","X5","X6","X7")]
+colnames(kaiju) <- c("contig","domain","phylum","class","order","family","genus","species")
+kaiju=as.data.frame(kaiju, stringsAsFactors = FALSE)
+names <- c("domain","phylum","class","order","family","genus","species")
+kaiju[names] <- lapply(kaiju[names], gsub, pattern = "NA", replacement = "Unclassified")
+
+# Merge and annotate dataframes
+general <- cbind(assembly_general,ilm_general,np_general)
+
+contigs <- merge(coverage,contig_gc,by="contig")
+contigs <- merge(contigs,assembly_info,by="contig")
+
+contigs <- merge(contigs,medak_contigs,by="contig", all=TRUE)
+contigs$medak_var_n[is.na(contigs$medak_var_n)] <- 0
+contigs$medak_var_perc <- round((contigs$medak_var_n / contigs$contig_len_bp * 100), 8)
+
+contigs <- merge(contigs,kaiju,by="contig", all=TRUE)
+
+contigs$domain[is.na(contigs$domain)] <- "Unclassified"
+contigs$phylum[is.na(contigs$phylum)] <- "Unclassified"
+contigs$class[is.na(contigs$class)] <- "Unclassified"
+contigs$order[is.na(contigs$order)] <- "Unclassified"
+contigs$family[is.na(contigs$family)] <- "Unclassified"
+contigs$genus[is.na(contigs$genus)] <- "Unclassified"
+contigs$species[is.na(contigs$species)] <- "Unclassified"
+
+bins <- merge(bakta,quast, by="bin", all=TRUE)
+bins <- merge(bins,checkm, by="bin", all=TRUE)
+bins <- merge(bins,gunc, by="bin", all=TRUE)
+bins <- merge(bins,gtdb, by="bin", all=TRUE)
+bins <- merge(bins,silva, by="bin", all=TRUE)
+
+general$mags_workflow_name <- name$V1
+general$mags_workflow_date <- name$V2
+general$mags_workflow_mode <- name$V3
+
+contigs$mags_workflow_name <- name$V1
+contigs$mags_workflow_date <- name$V2
+contigs$mags_workflow_mode <- name$V3
+
+bins$mags_workflow_name <- name$V1
+bins$mags_workflow_date <- name$V2
+bins$mags_workflow_mode <- name$V3
+
+# Classify MAGs according to MIMAG standards
+bins$MAG_status <- ifelse((bins$Completeness >= 90 & bins$Contamination <= 5 & bins$tRNA_uniq >= 18 &
+                bins$rRNA_5S >= 1 &  bins$rRNA_16S >= 1 & bins$rRNA_23S >= 1),"HQ",
+              ifelse(bins$Completeness >= 50 & bins$Contamination <= 10, "MQ",
+              ifelse(bins$Completeness <= 50 & bins$Contamination <= 10, "LQ", "Contaminated")))
+
+# Get bin coverage and SNP rates
+cov_long=read.delim("bin_cov_long.tsv", sep="\t", header=T)
+cov_short=read.delim("bin_cov_short.tsv", sep="\t", header=T)
+abund_long=read.delim("bin_abund_long.tsv", sep="\t", header=T)
+abund_short=read.delim("bin_abund_short.tsv", sep="\t", header=T)
+
+cov_abund <- merge(cov_long,cov_short, by="Genome")
+cov_abund <- merge(cov_abund,abund_long, by="Genome")
+cov_abund <- merge(cov_abund,abund_short, by="Genome")
+colnames(cov_abund)<- c("bin","cov_long","cov_ilm","Rabund_long","Rabund_ilm")
+bins = merge(bins,cov_abund, by="bin")
+
+bins <- merge(bins,medak_bins,by="bin", all=TRUE)
+bins$medak_var_n[is.na(bins$medak_var_n)] <- 0
+bins$medak_var_perc <- round((bins$medak_var_n / bins$Genome_size_bp * 100), 8)
+
+# Indentify circular MAGs
+bins$cMAG_status <- ifelse(grepl("bin.c",bins$bin),"Y","N")
+
+# Majority vote Kaiju classification of bins at domain level
+bin_calc <- merge(contigs,bin_contig,by="contig", all=TRUE)
+bin_calc <- bin_calc[(bin_calc$bin %in% bin_contig$bin),]
+bin_calc <- bin_calc[!is.na(bin_calc$bin),]
+                     
+kaiju_domain <- aggregate(bin_calc$contig_len_bp, by=list(bin_calc$bin,bin_calc$domain), FUN=sum)
+colnames(kaiju_domain)<- c("bin","kaiju_domain","contig_len_bp")
+
+kaiju_domain_sort <- aggregate(kaiju_domain$contig_len_bp, by = list(kaiju_domain$bin), max)
+colnames(kaiju_domain_sort)<- c("bin","contig_len_bp")
+
+kaiju_domain_sort <- merge(kaiju_domain,kaiju_domain_sort, by=c("contig_len_bp","bin"))
+kaiju_domain_sort$contig_len_bp <- NULL
+bins <- merge(bins,kaiju_domain_sort, by="bin", all=TRUE)
+
+# Majority vote Kaiju classification of bins at phylum level
+kaiju_phylum <- aggregate(bin_calc$contig_len_bp, by=list(bin_calc$bin,bin_calc$phylum), FUN=sum)
+colnames(kaiju_phylum)<- c("bin","kaiju_phylum","contig_len_bp")
+
+kaiju_phylum_sort <- aggregate(kaiju_phylum$contig_len_bp, by = list(kaiju_phylum$bin), max)
+colnames(kaiju_phylum_sort)<- c("bin","contig_len_bp")
+
+kaiju_phylum_sort <- merge(kaiju_phylum,kaiju_phylum_sort, by=c("contig_len_bp","bin"))
+kaiju_phylum_sort$contig_len_bp <- NULL
+bins <- merge(bins,kaiju_phylum_sort, by="bin", all=TRUE)
+
+# Wrangle contig-bin-ARG links
+contigs <- merge(contigs,bin_contig,by="contig", all=TRUE)
+contigs <- contigs[(contigs$contig_len_bp > 0), ]
+contigs <- contigs[!is.na(contigs$contig),]
+contigs <- contigs[!duplicated(contigs$contig),]
+
+bins <- bins[!duplicated(bins$bin),]
+
+# Summarise results for the general dataframe
+general$contigs_circ <- nrow(contigs[(contigs$status_circular == "Y"), ])
+general$contigs_circ_above_HalfMb <- nrow(contigs[(contigs$status_circular == "Y" & contigs$contig_len_bp >= 500000), ])
+
+general$contigs_abund_bac <- sum(contigs[(contigs$domain == "Bacteria"), ]$contig_len_bp * contigs[(contigs$domain == "Bacteria"), ]$cov_long) / sum(contigs$contig_len_bp * contigs$cov_long) * 100
+general$contigs_abund_arc <- sum(contigs[(contigs$domain == "Archaea"), ]$contig_len_bp * contigs[(contigs$domain == "Archaea"), ]$cov_long) / sum(contigs$contig_len_bp * contigs$cov_long) * 100
+
+general$all_mags <- nrow(bins)
+general$circ_mags <- nrow(bins[(bins$cMAG_status == "Y"), ])
+general$hq_mags <- nrow(bins[(bins$MAG_status == "HQ"), ])
+general$mq_mags <- nrow(bins[(bins$MAG_status == "MQ"), ])
+general$lq_mags <- nrow(bins[(bins$MAG_status == "LQ"), ])
+general$contaminated_mags <- nrow(bins[(bins$MAG_status == "Contaminated"), ])
+
+general$asm_binned <- sum(bins$Genome_size_bp)/general$assembly_size_bp*100
+general$Rabund_binned_long <- sum(bins$Rabund_long)
+general$Rabund_binned_ilm <- sum(bins$Rabund_ilm)
+
+general$mag_cov_med_hq_mq <- median(bins[(bins$MAG_status == "MQ" | bins$MAG_status == "HQ"), ]$cov_long)
+general$mag_cov_med_hq <- median(bins[(bins$MAG_status == "HQ"), ]$cov_long)
+general$mag_cov_med_mq <- median(bins[(bins$MAG_status == "MQ"), ]$cov_long)
+
+general$mag_cov_mad_hq_mq <- mad(bins[(bins$MAG_status == "MQ" | bins$MAG_status == "HQ"), ]$cov_long)
+general$mag_cov_mad_hq <- mad(bins[(bins$MAG_status == "HQ"), ]$cov_long)
+general$mag_cov_mad_mq <- mad(bins[(bins$MAG_status == "MQ"), ]$cov_long)
+
+general$contigs_med_hq_mq <- median(bins[(bins$MAG_status == "MQ" | bins$MAG_status == "HQ"), ]$contigs)
+general$contigs_med_hq <- median(bins[(bins$MAG_status == "HQ"), ]$contigs)
+general$contigs_med_mq <- median(bins[(bins$MAG_status == "MQ"), ]$contigs)
+
+# Save dataframes
+write.table(general,"results_general.tsv", quote=F,row.names=FALSE, col.names=TRUE, sep = "\t")
+write.table(contigs,"results_contigs.tsv", quote=F,row.names=FALSE, col.names=TRUE, sep = "\t")
+write.table(bins,"results_bins.tsv", quote=F,row.names=FALSE, col.names=TRUE, sep = "\t")
+
+Generate_Dataframes
+
+cd $dir_work
+
+# Transfer output to result directory
+cp $dir_work/tmp/processing/results_general.tsv $dir_work/results
+cp $dir_work/tmp/processing/results_contigs.tsv $dir_work/results
+cp $dir_work/tmp/processing/results_bins.tsv $dir_work/results
+
+# Final checkpoint for file processing
+if [[ -f $dir_work/results/results_contigs.tsv ]] && [[ -f $dir_work/results/results_bins.tsv ]] && [[ -f $dir_work/results/results_general.tsv ]]
+then
+    echo "Dataframes deposited in the 'results' directory"
+	echo "Combined dataframes generated at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+else
+    echo "ERROR: missing result dataframes. Aborting..."
+	echo "Failure in dataframe generation $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+	exit 1
+fi
+
+# Rename dataframes according to run name
+cd $dir_work/results
+find $dir_work/results -type f -name "results_*.tsv" -printf '%f\n' | xargs -i --max-procs=1 bash -c "rename "s/results/$(basename $dir_work)/" {}"
+cd $dir_work
+
+# Wrap up
+echo "End of workflow. Output can be found in: $dir_work"
+echo "Workflow completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
+echo "Output files can be accessed at $dir_work" >> $dir_work/tmp/log.txt
+exit 0
