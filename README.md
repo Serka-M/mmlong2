@@ -52,10 +52,19 @@ EXTRA:
 ```
 <br/>
 
+**Overview of result files:**
+* `assembly.fasta` - assembled and polished metagenome with contigs longer than 1 kb
+* `assembly_graph.gfa` - metagenome assembly graph, showing links between contigs
+* `rRNA.fa` - rRNA sequences, recovered from the polished metagenome
+* `<name>_contigs.tsv` - dataframe for metagenome contig metrics
+* `<name>_bins.tsv` - dataframe for automated binning results
+* `<name>_general.tsv` - workflow results, summarized into a single row
+* `bakta` - directory, containing annotation results for genome bins
+<br/>
+
 **Additional documentation:**
 * [Dataframe description](msc/mmlong2-dfs.md)
 * [Dependency list](msc/mmlong2-dep.md)
-
 <br/>
 
 **Comments:**
