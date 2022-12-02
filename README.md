@@ -19,9 +19,10 @@ mmlong2 -h
 ```
 <br/>
 
-**Usage example for hybrid (Nanopore/Illumina) mode:** <br/>
-`./mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]`
-<br/>
+**Usage example for hybrid (Nanopore/Illumina) mode:**
+```
+./mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]
+```
 <br/>
 
 **Full usage:**
