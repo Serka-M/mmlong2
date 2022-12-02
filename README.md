@@ -62,7 +62,7 @@ EXTRA:
 * `<name>_general.tsv` - workflow results, summarized into a single row
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
-* `bakta` - directory, containing bins annotation results from [bakta](https://github.com/oschwengers/bakta)
+* `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
 
 <br/>
 
