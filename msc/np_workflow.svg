@@ -885,7 +885,7 @@
   <line class="cls-37" x1="302.28" y1="270.16" x2="226.46" y2="270.16"/>
   <text class="cls-28" transform="translate(187.73 319.02)">Assembled and<tspan x="-2.23" y="19.2">polished contigs</tspan></text>
   <line class="cls-38" x1="289.63" y1="261.54" x2="239.12" y2="261.54"/>
-  <text class="cls-29" transform="translate(697.9 219.78)">MetaBinner<tspan x="3.48" y="18">MetaB</tspan><tspan class="cls-39" x="46.83" y="18">A</tspan><tspan x="55.73" y="18">T2</tspan><tspan x="9.17" y="36">MaxBin2</tspan><tspan class="cls-39" x="17.65" y="54">V</tspan><tspan x="26.55" y="54">AMB</tspan></text>
+  <text class="cls-29" transform="translate(702.4 219.78)">MetaBinner<tspan x="3.48" y="18">MetaB</tspan><tspan class="cls-39" x="46.83" y="18">A</tspan><tspan x="55.73" y="18">T2</tspan><tspan x="6.26" y="36">GraphMB</tspan><tspan x="9.17" y="54">MaxBin2</tspan></text>
   <text class="cls-29" transform="translate(1056.35 255.78)">DAS<tspan class="cls-40" x="1.66" y="18">T</tspan><tspan x="9.16" y="18">ool</tspan></text>
   <text class="cls-28" transform="translate(1115.5 325.92)">Refined MAG</text>
   <text class="cls-28" transform="translate(1111.1 232.48)">Circular MAG</text>
