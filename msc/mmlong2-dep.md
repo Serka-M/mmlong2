@@ -15,7 +15,7 @@
 * [Metabat2](https://bitbucket.org/berkeleylab/metabat/src/master)
 * [Maxbin2](https://sourceforge.net/projects/maxbin2)
 * [MetaBinner](https://github.com/ziyewang/MetaBinner)
-* [Vamb](https://github.com/RasmussenLab/vamb)
+* [GraphMB](https://github.com/MicrobialDarkMatter/GraphMB)
 * [DAS Tool](https://github.com/cmks/DAS_Tool)
 * [Quast](https://github.com/ablab/quast)
 * [CheckM2](https://github.com/chklovski/CheckM2)
