@@ -1009,7 +1009,7 @@ else
 	     cd $dir_work/tmp/binning/bins
 	     find $dir_work/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | xargs rename 's/.*/our $i; sprintf("bin.%04d.fa", $i++)/e'
 		 cd $dir_work
-		 if [ -f $dir_work/tmp/binning/bins_c/cbins/*.fa ]; then rsync -avr $dir_work/tmp/binning/bins_c/cbins/*.fa $dir_work/tmp/binning/bins; fi
+		 if [ -f $dir_work/tmp/binning/bins_c/cbins/bin.c1.fa ]; then rsync -avr $dir_work/tmp/binning/bins_c/cbins/*.fa $dir_work/tmp/binning/bins; fi
 		 Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/bins -e fa > $dir_work/tmp/binning/contig_bin.tsv
 		 cat $dir_work/tmp/binning/bins/*.fa > $dir_work/tmp/binning/contigs_binned.fasta
 		 rsync -r $dir_work/tmp/binning/bins $dir_work/results/.
