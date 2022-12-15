@@ -24,3 +24,5 @@
 * [Bakta](https://github.com/oschwengers/bakta)
 * [CoverM](https://github.com/wwood/CoverM)
 * [Nanoq](https://github.com/esteinig/nanoq)
+
+[//]: # (Written by Mantas Sereika.)
