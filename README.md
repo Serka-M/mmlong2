@@ -77,3 +77,6 @@ EXTRA:
 * If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
 * MetaBinner and GraphMB binners require a complex metagenome to run, and thus might exit with an error when reads for a low-complexity metagenome are provided.
 * When the workflow is running with a large amount of threads (eg. 100), CheckM2 or GTDB-tk can get stuck. This can be fixed by re-running the workflow at 40 threads.
+
+**Future improvements**
+Suggestions on improving the workflow are always welcome. Please use the GitHub `Issues` section or e-mail the main author at mase@bio.aau.dk.
