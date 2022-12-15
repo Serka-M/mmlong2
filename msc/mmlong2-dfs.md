@@ -130,3 +130,5 @@
 | cMAG_status | No. of circular Genome bins |
 | kaiju_domain | Genome bin domain taxonomy by Kaiju |
 | kaiju_phylum | Genome bin phylum taxonomy by Kaiju |
+
+[//]: # (Written by Mantas Sereika.)
