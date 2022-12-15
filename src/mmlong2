@@ -336,27 +336,27 @@ fi
 # Assign software — modules
 MODUL_BIOAWK=Bioawk/1.0-foss-2018a
 MODUL_MINIMAP2=minimap2/2.24-GCCcore-10.2.0
-MODUL_SAMTOOLS=SAMtools/1.14-GCC-10.2.0
 MODUL_RACON=Racon/1.5.0-GCCcore-10.2.0-claaudia-amd
 MODUL_BARRNAP=Barrnap/0.9-foss-2018a
 MODUL_MAXBIN=MaxBin/2.2.7-foss-2018a-Perl-5.26.1
 MODUL_CONDA=Miniconda3/4.9.2-foss-2019a
-MODUL_CHECKM=CheckM2/0.1.3-foss-2020b
 MODUL_GTDB=GTDB-Tk/2.1.0-foss-2020b
 
 # Assign software — local conda environments             
 dir_flye=/projects/microflora_danica/mmlong2/conda/Flye_2.9.1 
 dir_medaka=/projects/microflora_danica/mmlong2/conda/Medaka_1.7.2
 dir_kaiju=/projects/microflora_danica/mmlong2/conda/Kaiju_1.9.2
+dir_samtools=/projects/microflora_danica/mmlong2/conda/SAMtools_1.16.1
 dir_whokaryote=/projects/microflora_danica/mmlong2/conda/Whokaryote_0.0.1
 dir_metabat=/projects/microflora_danica/mmlong2/conda/MetaBat2_2.15
 dir_graphmb=/projects/microflora_danica/mmlong2/conda/GraphMB_0.1.5
 dir_metabinner=/projects/microflora_danica/mmlong2/conda/MetaBinner_1.4.4
 dir_das_tool=/projects/microflora_danica/mmlong2/conda/DasTool_1.1.5
-dir_coverm=/projects/microflora_danica/mmlong2/conda/CoverM_0.6.1
+dir_checkm=/projects/microflora_danica/mmlong2/conda/checkm2_0.1.3
 dir_quast=/projects/microflora_danica/mmlong2/conda/Quast_5.2.0
 dir_gunc=/projects/microflora_danica/mmlong2/conda/Gunc_1.0.5
 dir_bakta=/projects/microflora_danica/mmlong2/conda/Bakta_1.6.0
+dir_coverm=/projects/microflora_danica/mmlong2/conda/CoverM_0.6.1
 dir_nanoq=/projects/microflora_danica/mmlong2/conda/NanoQ_0.9.0
 
 # Assign software — local databases    
@@ -371,22 +371,22 @@ echo "$(tr '/' ',' <<<"$MODUL_CONDA" | cut -f1 -d"-")" >> $dir_work/tmp/dependen
 echo "$(tr '_' ',' <<<"$(basename $dir_flye)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '/' ',' <<<"$MODUL_BIOAWK" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '/' ',' <<<"$MODUL_MINIMAP2" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
-echo "$(tr '/' ',' <<<"$MODUL_SAMTOOLS" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_samtools)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '/' ',' <<<"$MODUL_RACON" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_medaka)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_kaiju)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_whokaryote)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '/' ',' <<<"$MODUL_BARRNAP" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
-echo "$(tr ' ' ',' <<<"$(usearch11 --version)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr ' ' ',' <<<"$(usearch11 --version)" | cut -f1 -d"_" | sed 's/v//')" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_metabat)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '/' ',' <<<"$MODUL_MAXBIN" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_metabinner)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_graphmb)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_das_tool)")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_checkm)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_quast)")" >> $dir_work/tmp/dependencies.csv
-echo "$(tr '/' ',' <<<"$MODUL_CHECKM" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_gunc)")" >> $dir_work/tmp/dependencies.csv
-echo "$(tr '/' ',' <<<"$MODUL_GTDB" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '/' ',' <<<"$MODUL_GTDB" | cut -f1 -d"f" | sed 's/.$//')" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_bakta)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_nanoq)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_coverm)")" >> $dir_work/tmp/dependencies.csv
@@ -759,8 +759,10 @@ else
 	sort $dir_work/tmp/whokaryote/eukaryote_contig_headers.txt > $dir_work/tmp/whokaryote/contig_euk.txt
 	comm -23 $dir_work/tmp/whokaryote/contig_id.txt $dir_work/tmp/whokaryote/contig_euk.txt > $dir_work/tmp/whokaryote/contigs_filt.txt
 	
-	module load $MODUL_SAMTOOLS > /dev/null 2>&1
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_samtools > /dev/null 2>&1
 	xargs --arg-file=$dir_work/tmp/whokaryote/contigs_filt.txt samtools faidx $dir_work/tmp/polishing/assembly_polished_above1kb.fasta -o $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta
+	source deactivate > /dev/null 2>&1
 	echo "Detection of eukaryotic sequences from metagenome with Whokaryote completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 fi
 
@@ -796,7 +798,9 @@ then
     echo "Skipping cMAG preparation..." 
 else
 	echo "Performing filtering of circular contigs..." 
-	module purge && module load $MODUL_SAMTOOLS > /dev/null 2>&1
+	module purge 
+	module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_samtools > /dev/null 2>&1
     mkdir $dir_work/tmp/binning/bins_c && cd $dir_work/tmp/binning/bins_c
 	mkdir cbins 
 	rsync -avr $dir_work/tmp/flye/assembly_info.txt . > /dev/null 2>&1
@@ -810,6 +814,7 @@ else
 	
 	awk -F "\t" '{ if ($4 == "N") {print $1} }' assembly_info.txt | awk 'BEGIN { ORS = " " } { print }' - > contigs_lin_horz.txt
 	xargs --arg-file=contigs_lin_horz.txt samtools faidx -c assembly_polished_above1kb_filt.fasta -o contigs_lin_filt_.fasta > /dev/null 2>&1
+	source deactivate > /dev/null 2>&1
 	module load $MODUL_BIOAWK > /dev/null 2>&1 && bioawk -c fastx '{ if(length($seq) > 1000) { print ">"$name; print $seq }}' contigs_lin_filt_.fasta > contigs_lin_filt.fasta
 	cd $dir_work
 fi
@@ -842,7 +847,6 @@ then
 else
 
 module load $MODUL_MINIMAP2 > /dev/null 2>&1
-module load $MODUL_SAMTOOLS > /dev/null 2>&1
 module load $MODUL_CONDA > /dev/null 2>&1
 
 mkdir $dir_work/tmp/binning/mapping_tmp
@@ -851,7 +855,6 @@ mkdir $dir_work/tmp/binning/maxbin_tmp
 mkdir $dir_work/tmp/binning/metabinner_tmp
 count=0
 
-source activate $dir_metabat > /dev/null 2>&1
 cat $dir_work/tmp/binning/binning_input.csv | while read line || [ -n "$line" ]
 do
 	count=$(($count + 1))
@@ -865,8 +868,14 @@ do
 	if [ ! -f $dir_work/tmp/binning/metabat_tmp/"${count}_metabat.tsv" ]
 	then 
 	
+	source activate $dir_samtools > /dev/null 2>&1
 	minimap2  -I 50G -K 10G -t $threads -ax $mapping $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta $reads | samtools view --threads $(($threads / 2)) -Sb -F 2308 - | samtools sort --threads $(($threads / 2)) - > $dir_work/tmp/binning/mapping_tmp/"${count}_cov.bam"
+	source deactivate > /dev/null 2>&1
+	
+	source activate $dir_metabat > /dev/null 2>&1
 	jgi_summarize_bam_contig_depths $dir_work/tmp/binning/mapping_tmp/"${count}_cov.bam" --percentIdentity $ident --outputDepth $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv"
+	source deactivate > /dev/null 2>&1
+	
 	cut -f1,3 $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" | tail -n+2 > $dir_work/tmp/binning/maxbin_tmp/"${count}_cov.tsv"
 	
 	if [ "${count}_cov.tsv" == "1_cov.tsv" ]; then cp $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" $dir_work/tmp/binning/metabat_tmp/"${count}_metabat.tsv"; else cut -f4,5 $dir_work/tmp/binning/metabat_tmp/"${count}_cov.tsv" > $dir_work/tmp/binning/metabat_tmp/"${count}_metabat.tsv"; fi;
@@ -874,7 +883,6 @@ do
 	
 	fi
 done
-source deactivate > /dev/null 2>&1
 
 paste -d "\t" $(ls -v $dir_work/tmp/binning/metabat_tmp/*_metabat.tsv) > $dir_work/tmp/binning/metabat_cov_full.tsv
 grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/binning/metabat_cov_full.tsv > $dir_work/tmp/binning/metabat_cov.tsv
@@ -887,7 +895,9 @@ find maxbin_tmp -type f -name "*cov.tsv" -printf '%f\n' | xargs -i --max-procs=$
 find $dir_work/tmp/binning/maxbin_tmp/filt_*.tsv > $dir_work/tmp/binning/maxbin_list.txt
 
 cut -f1 $dir_work/tmp/binning/maxbin_tmp/filt_1_cov.tsv | awk 'BEGIN { ORS = " " } { print }' - > $dir_work/tmp/binning/bins_c/contigs_lin_horz_ord.txt
+source activate $dir_samtools > /dev/null 2>&1
 xargs --arg-file=$dir_work/tmp/binning/bins_c/contigs_lin_horz_ord.txt samtools faidx $dir_work/tmp/binning/bins_c/contigs_lin_filt.fasta -o $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta > /dev/null 2>&1
+source deactivate > /dev/null 2>&1
 cd $dir_work
 
 fi
@@ -961,13 +971,15 @@ then
 	bins_n=$(find $dir_work/tmp/binning/graphmb/_bins/* -name *fa | wc -l)
     echo "Found $bins_n bins for GraphMB. Skipping..." 
 else
+	cd $dir_work/tmp/binning
 	module load $MODUL_CONDA > /dev/null 2>&1
 	source activate $dir_graphmb > /dev/null 2>&1
 	rsync -avr $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta $dir_work/tmp/binning/.
 	rsync -avr $dir_work/tmp/flye/assembly_graph.gfa $dir_work/tmp/binning/.
 	graphmb --assembly $dir_work/tmp/binning --outdir $dir_work/tmp/binning/graphmb --assembly_name contigs_lin_filt_ord.fasta --depth metabat_cov.tsv --contignodes --numcores $threads --assembly_type flye 
 	source deactivate > /dev/null 2>&1
-
+	cd $dir_work
+	
 	bins_n=$(find $dir_work/tmp/binning/graphmb/_bins/* -name *fa | wc -l)
 	echo "$bins_n bins acquired with GraphMB at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 fi
@@ -1003,22 +1015,13 @@ else
 	echo "$bins_n refined bins selected with DAS Tool at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 	
 	# Wrangle DAS Tool output
-	cp -r $dir_work/tmp/binning/das_tool/output_DASTool_bins $dir_work/tmp/binning/bins
-	if [ -d "$dir_work/tmp/binning/bins" ] 
-	then
-	     cd $dir_work/tmp/binning/bins
-	     find $dir_work/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | xargs rename 's/.*/our $i; sprintf("bin.%04d.fa", $i++)/e'
-		 cd $dir_work
-		 if [ -f $dir_work/tmp/binning/bins_c/cbins/bin.c1.fa ]; then rsync -avr $dir_work/tmp/binning/bins_c/cbins/*.fa $dir_work/tmp/binning/bins; fi
-		 Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/bins -e fa > $dir_work/tmp/binning/contig_bin.tsv
-		 cat $dir_work/tmp/binning/bins/*.fa > $dir_work/tmp/binning/contigs_binned.fasta
-		 rsync -r $dir_work/tmp/binning/bins $dir_work/results/.
-		 source deactivate > /dev/null 2>&1
-	else
-	     echo "ERROR: failure in bin refinement. Aborting..."
-		 source deactivate > /dev/null 2>&1
-		 exit 1
-	fi
+	mkdir $dir_work/tmp/binning/bins
+	n=1 && for i in $dir_work/tmp/binning/das_tool/output_DASTool_bins/*.fa; do cp $i $dir_work/tmp/binning/bins/bin.${n}.fa && n=$(($n+1)) ; done
+	if [ -f $dir_work/tmp/binning/bins_c/cbins/bin.c1.fa ]; then rsync -avr $dir_work/tmp/binning/bins_c/cbins/*.fa $dir_work/tmp/binning/bins; fi
+	cat $dir_work/tmp/binning/bins/*.fa > $dir_work/tmp/binning/contigs_binned.fasta
+	rsync -r $dir_work/tmp/binning/bins $dir_work/results/.
+	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/bins -e fa > $dir_work/tmp/binning/contig_bin.tsv
+	source deactivate > /dev/null 2>&1
 	
 fi
 
@@ -1072,13 +1075,12 @@ if [ -f "$dir_work/tmp/binning/checkm/quality_report.tsv" ]
 then
     echo "CheckM results file already exists. Skipping..." 
 else
-	module purge && module load $MODUL_CHECKM > /dev/null 2>&1
+	module purge && module load $MODUL_CONDA > /dev/null 2>&1
+	source activate $dir_checkm > /dev/null 2>&1
 	export TMPDIR=$dir_tmp
 	export OPENBLAS_NUM_THREADS=1
-	export GOTO_NUM_THREADS=1
-	export OMP_NUM_THREADS=1
-	export NUMEXPR_MAX_THREADS=1
 	checkm2 predict -x .fa -i $dir_work/tmp/binning/bins -o $dir_work/tmp/binning/checkm -t $threads
+	source deactivate > /dev/null 2>&1
 	echo "Bin quality estimates with CheckM completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 fi
 
@@ -1759,12 +1761,12 @@ Generate_Dataframes
 cd $dir_work
 
 # Transfer output to result directory
-cp $dir_work/tmp/processing/results_general.tsv $dir_work/results
-cp $dir_work/tmp/processing/results_contigs.tsv $dir_work/results
-cp $dir_work/tmp/processing/results_bins.tsv $dir_work/results
+cp $dir_work/tmp/processing/results_general.tsv $dir_work/results/$(basename $dir_work)_general.tsv
+cp $dir_work/tmp/processing/results_contigs.tsv $dir_work/results/$(basename $dir_work)_contigs.tsv
+cp $dir_work/tmp/processing/results_bins.tsv $dir_work/results/$(basename $dir_work)_bins.tsv
 
 # Final checkpoint for file processing
-if [[ -f $dir_work/results/results_contigs.tsv ]] && [[ -f $dir_work/results/results_bins.tsv ]] && [[ -f $dir_work/results/results_general.tsv ]]
+if [[ -f $dir_work/results/$(basename $dir_work)_contigs.tsv ]] && [[ -f $dir_work/results/$(basename $dir_work)_bins.tsv ]] && [[ -f $dir_work/results/$(basename $dir_work)_general.tsv ]]
 then
     echo "Dataframes deposited in the 'results' directory"
 	echo "Combined dataframes generated at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
@@ -1773,11 +1775,6 @@ else
 	echo "Failure in dataframe generation $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 	exit 1
 fi
-
-# Rename dataframes according to run name
-cd $dir_work/results
-find $dir_work/results -type f -name "results_*.tsv" -printf '%f\n' | xargs -i --max-procs=1 bash -c "rename "s/results/$(basename $dir_work)/" {}"
-cd $dir_work
 
 # Wrap up
 echo "End of workflow. Output can be found in: $dir_work"
