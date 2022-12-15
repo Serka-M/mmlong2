@@ -80,4 +80,4 @@ EXTRA:
 
 **Future improvements**<br/>
 Suggestions on improving the workflow or fixing bugs are always welcome.<br/>
-Please use the GitHub `Issues` section or e-mail the main author at mase@bio.aau.dk.
+Please use the GitHub `Issues` section or e-mail the main author at mase@bio.aau.dk for providing feedback.
