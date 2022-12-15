@@ -78,6 +78,6 @@ EXTRA:
 * When the workflow is running with a large amount of threads (eg. 100), CheckM2 or GTDB-tk can get stuck. This can be fixed by re-running the workflow at 40 threads.
 <br/>
 
-**Future improvements**
+**Future improvements**<br/>
 Suggestions on improving the workflow or fixing bugs are always welcome.
 Please use the GitHub `Issues` section or e-mail the main author at mase@bio.aau.dk.
