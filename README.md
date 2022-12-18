@@ -10,7 +10,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 <br/>
 
 **Overview of mmlong2 workflow in Nanopore-only mode:**
-<img src="msc/np_workflow.svg" alt="mmlong2-np" style="zoom:100%;" />
+<img src="msc/np_workflow.png" alt="mmlong2-np" style="zoom:100%;" />
 
 **Quick-start (AAU bioserver users):**
 ```
@@ -80,4 +80,4 @@ EXTRA:
 
 **Future improvements**<br/>
 Suggestions on improving the workflow or fixing bugs are always welcome.<br/>
-Please use the GitHub `Issues` section or e-mail the main author at mase@bio.aau.dk for providing feedback.
+Please use the GitHub `Issues` section or e-mail the main author (mase@bio.aau.dk) for providing feedback.
