@@ -346,6 +346,7 @@ dir_flye=/projects/microflora_danica/mmlong2/conda/Flye_2.9.1
 dir_medaka=/projects/microflora_danica/mmlong2/conda/Medaka_1.7.2
 dir_kaiju=/projects/microflora_danica/mmlong2/conda/Kaiju_1.9.2
 dir_samtools=/projects/microflora_danica/mmlong2/conda/SAMtools_1.16.1
+dir_seqtk=/projects/microflora_danica/mmlong2/conda/Seqtk_1.3
 dir_whokaryote=/projects/microflora_danica/mmlong2/conda/Whokaryote_0.0.1
 dir_metabat=/projects/microflora_danica/mmlong2/conda/MetaBat2_2.15
 dir_semibin=/projects/microflora_danica/mmlong2/conda/SemiBin_1.4.0
@@ -373,6 +374,7 @@ echo "$(tr '/' ',' <<<"$MODUL_BIOAWK" | cut -f1 -d"-")" >> $dir_work/tmp/depende
 echo "$(tr '/' ',' <<<"$MODUL_MINIMAP2" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_samtools)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '/' ',' <<<"$MODUL_RACON" | cut -f1 -d"-")" >> $dir_work/tmp/dependencies.csv
+echo "$(tr '_' ',' <<<"$(basename $dir_seqtk)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_medaka)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_kaiju)")" >> $dir_work/tmp/dependencies.csv
 echo "$(tr '_' ',' <<<"$(basename $dir_whokaryote)")" >> $dir_work/tmp/dependencies.csv
@@ -800,22 +802,24 @@ else
 	echo "Performing filtering of circular contigs..." 
 	module purge 
 	module load $MODUL_CONDA > /dev/null 2>&1
-	source activate $dir_samtools > /dev/null 2>&1
-    mkdir $dir_work/tmp/binning/bins_c && cd $dir_work/tmp/binning/bins_c
+    mkdir $dir_work/tmp/binning/bins_c
+	cd $dir_work/tmp/binning/bins_c
 	mkdir cbins 
 	rsync -avr $dir_work/tmp/flye/assembly_info.txt . > /dev/null 2>&1
 	rsync -avr $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta . > /dev/null 2>&1
 	
 	awk -F "\t" '{ if (($2 >= 250000) && ($4 == "Y")) {print $1 "\t" "bin.c" ++i; next} }' assembly_info.txt > contig_cbin.tsv
+	source activate $dir_samtools > /dev/null 2>&1
 	if [ $(cat contig_cbin.tsv | wc -l) -ge 1 ]; then cat contig_cbin.tsv | xargs -i --max-procs=1 -n 2 bash -c 'samtools faidx assembly_polished_above1kb_filt.fasta $0 > cbins/$1.fa'; fi;
+	source deactivate > /dev/null 2>&1
 	find cbins -name "bin.c*.fa" -type f -size -2k -delete
 	awk -F "\t" '{ if (($2 >= 250000) && ($4 == "Y")) {print $1 "\t"} }' assembly_info.txt > contigs_circ_vert.txt
 	awk -F "\t" '{ if ($4 == "Y") {print $1 "\t"} }' assembly_info.txt > contigs_circ_all_vert.txt
 	
-	awk -F "\t" '{ if ($4 == "N") {print $1} }' assembly_info.txt | awk 'BEGIN { ORS = " " } { print }' - > contigs_lin_horz.txt
-	xargs --arg-file=contigs_lin_horz.txt samtools faidx -c assembly_polished_above1kb_filt.fasta -o contigs_lin_filt_.fasta > /dev/null 2>&1
+	awk -F "\t" '{ if (($2 >= 1000) && ($4 == "N")) {print $1} }' assembly_info.txt > contigs_lin_vert.txt
+	source activate $dir_seqtk > /dev/null 2>&1
+	seqtk subseq $dir_work/tmp/whokaryote/assembly_polished_above1kb_filt.fasta contigs_lin_vert.txt > contigs_lin_filt_ord.fasta 
 	source deactivate > /dev/null 2>&1
-	module load $MODUL_BIOAWK > /dev/null 2>&1 && bioawk -c fastx '{ if(length($seq) > 1000) { print ">"$name; print $seq }}' contigs_lin_filt_.fasta > contigs_lin_filt.fasta
 	cd $dir_work
 fi
 
@@ -886,13 +890,6 @@ grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/
 
 paste -d "\t" $(ls -v $dir_work/tmp/binning/metabinner_tmp/*_metabinner.tsv) > $dir_work/tmp/binning/metabinner_cov_full.tsv
 grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/binning/metabinner_cov_full.tsv > $dir_work/tmp/binning/metabinner_cov.tsv 
-
-cd $dir_work/tmp/binning
-cut -f1 $dir_work/tmp/binning/metabat_cov.tsv | sed 1d | awk 'BEGIN { ORS = " " } { print }' - > $dir_work/tmp/binning/bins_c/contigs_lin_horz_ord.txt
-source activate $dir_samtools > /dev/null 2>&1
-xargs --arg-file=$dir_work/tmp/binning/bins_c/contigs_lin_horz_ord.txt samtools faidx $dir_work/tmp/binning/bins_c/contigs_lin_filt.fasta -o $dir_work/tmp/binning/bins_c/contigs_lin_filt_ord.fasta > /dev/null 2>&1
-source deactivate > /dev/null 2>&1
-cd $dir_work
 
 fi
 
