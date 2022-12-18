@@ -13,7 +13,7 @@
 * [Kaiju](https://github.com/bioinformatics-centre/kaiju)
 * [Whokaryote](https://github.com/LottePronk/whokaryote)
 * [Metabat2](https://bitbucket.org/berkeleylab/metabat/src/master)
-* [Maxbin2](https://sourceforge.net/projects/maxbin2)
+* [SemiBin](https://github.com/BigDataBiology/SemiBin)
 * [MetaBinner](https://github.com/ziyewang/MetaBinner)
 * [GraphMB](https://github.com/MicrobialDarkMatter/GraphMB)
 * [DAS Tool](https://github.com/cmks/DAS_Tool)
