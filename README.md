@@ -30,7 +30,7 @@ mmlong2 -h
 READ INPUTS: 
 -np		Nanopore_reads.fastq
 -il		llumina_reads.fastq
--pb		PacBio_CCS_reads.fastq
+-pb		PacBio_HiFi_reads.fastq
 
 OPTIONAL INPUTS:
 -o		Output directory
