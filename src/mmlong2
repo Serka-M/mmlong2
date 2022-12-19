@@ -813,8 +813,6 @@ else
 	if [ $(cat contig_cbin.tsv | wc -l) -ge 1 ]; then cat contig_cbin.tsv | xargs -i --max-procs=1 -n 2 bash -c 'samtools faidx assembly_polished_above1kb_filt.fasta $0 > cbins/$1.fa'; fi;
 	source deactivate > /dev/null 2>&1
 	find cbins -name "bin.c*.fa" -type f -size -2k -delete
-	awk -F "\t" '{ if (($2 >= 250000) && ($4 == "Y")) {print $1 "\t"} }' assembly_info.txt > contigs_circ_vert.txt
-	awk -F "\t" '{ if ($4 == "Y") {print $1 "\t"} }' assembly_info.txt > contigs_circ_all_vert.txt
 	
 	awk -F "\t" '{ if (($2 >= 1000) && ($4 == "N")) {print $1} }' assembly_info.txt > contigs_lin_vert.txt
 	source activate $dir_seqtk > /dev/null 2>&1
@@ -894,7 +892,7 @@ R --slave --silent --args << 'cov'
 metabat <- read.delim("metabat_cov_full.tsv", sep="\t", header=T)
 metabin <- read.delim("metabinner_cov_full.tsv", sep="\t", header=T)
 
-contigs <- read.delim("bins_c/contigs_lin_vert.txt", sep="\t", header=T)
+contigs <- read.delim("bins_c/contigs_lin_vert.txt", sep="\t", header=F)
 colnames(contigs)[1] <- "contigName"
 
 metabat_filt <- merge(contigs,metabat, by="contigName")
