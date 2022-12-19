@@ -886,10 +886,25 @@ do
 done
 
 paste -d "\t" $(ls -v $dir_work/tmp/binning/metabat_tmp/*_metabat.tsv) > $dir_work/tmp/binning/metabat_cov_full.tsv
-grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/binning/metabat_cov_full.tsv > $dir_work/tmp/binning/metabat_cov.tsv
-
 paste -d "\t" $(ls -v $dir_work/tmp/binning/metabinner_tmp/*_metabinner.tsv) > $dir_work/tmp/binning/metabinner_cov_full.tsv
-grep -v -f $dir_work/tmp/binning/bins_c/contigs_circ_all_vert.txt $dir_work/tmp/binning/metabinner_cov_full.tsv > $dir_work/tmp/binning/metabinner_cov.tsv 
+
+cd $dir_work/tmp/binning
+R --slave --silent --args << 'cov'
+
+metabat <- read.delim("metabat_cov_full.tsv", sep="\t", header=T)
+metabin <- read.delim("metabinner_cov_full.tsv", sep="\t", header=T)
+
+contigs <- read.delim("bins_c/contigs_lin_vert.txt", sep="\t", header=T)
+colnames(contigs)[1] <- "contigName"
+
+metabat_filt <- merge(contigs,metabat, by="contigName")
+metabin_filt <- merge(contigs,metabin, by="contigName")
+
+write.table(metabat_filt,"metabat_cov.tsv", quote=F, row.names=FALSE, col.names=TRUE, sep = "\t")
+write.table(metabin_filt,"metabinner_cov.tsv", quote=F, row.names=FALSE, col.names=TRUE, sep = "\t")
+
+cov
+cd $dir_work
 
 fi
 
@@ -1016,6 +1031,9 @@ else
 	source deactivate > /dev/null 2>&1
 	
 fi
+
+# Check if final output for linear contigs exists
+if [ ! -f $dir_work/tmp/binning/bins/bin.1.fa ]; then echo "ERROR in binning linear contigs. Aborting..." && exit 1; fi
 
 # Early stoppage
 if [ $stages_selected == "binning" ]
