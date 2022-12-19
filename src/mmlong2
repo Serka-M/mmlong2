@@ -356,7 +356,7 @@ dir_das_tool=/projects/microflora_danica/mmlong2/conda/DasTool_1.1.5
 dir_checkm=/projects/microflora_danica/mmlong2/conda/checkm2_0.1.3
 dir_quast=/projects/microflora_danica/mmlong2/conda/Quast_5.2.0
 dir_gunc=/projects/microflora_danica/mmlong2/conda/Gunc_1.0.5
-dir_bakta=/projects/microflora_danica/mmlong2/conda/Bakta_1.6.0
+dir_bakta=/projects/microflora_danica/mmlong2/conda/Bakta_1.6.1
 dir_coverm=/projects/microflora_danica/mmlong2/conda/CoverM_0.6.1
 dir_nanoq=/projects/microflora_danica/mmlong2/conda/NanoQ_0.9.0
 
