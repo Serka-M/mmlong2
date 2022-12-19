@@ -6,6 +6,7 @@
 * [Bioawk](https://github.com/lh3/bioawk)
 * [Minimap2](https://github.com/lh3/minimap2)
 * [Samtools](https://github.com/samtools/samtools)
+* [Seqtk](https://github.com/lh3/seqtk)
 * [Racon](https://github.com/isovic/racon)
 * [Medaka](https://github.com/nanoporetech/medaka)
 * [Barrnap](https://github.com/tseemann/barrnap)
