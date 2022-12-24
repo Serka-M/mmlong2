@@ -1,5 +1,5 @@
 <p align="center">
-<img align="center" width="180" height="180" src="msc/logo.png" alt="logo" style="zoom:100%;" />
+<img align="center" width="165" height="165" src="msc/logo.png" alt="logo" style="zoom:100%;" />
 </p>
 
 Automated long-read metagenomics workflow, using either PacBio HiFi or Nanopore sequencing reads as input to generate characterized MAGs.
