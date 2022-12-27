@@ -75,7 +75,6 @@ EXTRA:
 * The workflow is long-read-based and requires either Nanopore or PacBio HiFi reads. It doesn't feature an Illumina-only mode.
 * If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
 * It is recommended to run the workflow from a screen session. This can be achieved with e.g. `screen -R mmlong2` and then running the workflow.
-* When the workflow is running with a large amount of threads (eg. 100), CheckM2 or GTDB-tk might get stuck. This can be fixed by re-running the workflow at 40 threads.
 <br/>
 
 **Future improvements**<br/>
