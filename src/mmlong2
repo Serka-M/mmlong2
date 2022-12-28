@@ -40,7 +40,7 @@ EXTRA: \n -h OR -help	Display help file \n -version	Display workflow version \n 
 # Additional information for terminal interface
 info_text="
  Long-read metagenomics workflow using either PacBio HiFi or Nanopore sequencing data.\n
- Written by Mantas Sereika (mase@bio.aau.dk), 2022.\n
+ Written by Mantas Sereika (mase@bio.aau.dk), 2023.\n
  This program is free software: you can redistribute it and/or modify \n it under the terms of the GNU General Public License as published by \n the Free Software Foundation, either version 3 of the License, or \n (at your option) any later version. \n
  This program is distributed in the hope that it will be useful, \n but WITHOUT ANY WARRANTY; without even the implied warranty of \n MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the \n GNU General Public License for more details:\n https://www.gnu.org/licenses/ \n
  Center for Microbial Communities, Aalborg University, Denmark. \n \n"
@@ -352,7 +352,7 @@ dir_metabat=/projects/microflora_danica/mmlong2/conda/MetaBat2_2.15
 dir_semibin=/projects/microflora_danica/mmlong2/conda/SemiBin_1.4.0
 dir_graphmb=/projects/microflora_danica/mmlong2/conda/GraphMB_0.1.5
 dir_metabinner=/projects/microflora_danica/mmlong2/conda/MetaBinner_1.4.4
-dir_das_tool=/projects/microflora_danica/mmlong2/conda/DasTool_1.1.5
+dir_das_tool=/projects/microflora_danica/mmlong2/conda/DasTool_1.1.3
 dir_checkm=/projects/microflora_danica/mmlong2/conda/checkm2_0.1.3
 dir_quast=/projects/microflora_danica/mmlong2/conda/Quast_5.2.0
 dir_gunc=/projects/microflora_danica/mmlong2/conda/Gunc_1.0.5
@@ -1004,14 +1004,15 @@ if [ $bins_n -ge 1 ]
 then
 	echo "Found $bins_n bins for DAS Tool. Skipping..."
 else
+	module purge
 	module load $MODUL_CONDA > /dev/null 2>&1
 	source activate $dir_das_tool > /dev/null 2>&1
 	cd $dir_work/tmp/binning/das_tool
 	
 	# Get binner results
-	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/metabat2 -e fa > $dir_work/tmp/binning/das_tool/metabat2.tsv
-	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/semibin/output_bins -e fa > $dir_work/tmp/binning/das_tool/semibin.tsv
-	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/graphmb/_bins -e fa > $dir_work/tmp/binning/das_tool/graphmb.tsv
+	Fasta_to_Scaffolds2Bin.sh -i $dir_work/tmp/binning/metabat2 -e fa > $dir_work/tmp/binning/das_tool/metabat2.tsv
+	Fasta_to_Scaffolds2Bin.sh -i $dir_work/tmp/binning/semibin/output_bins -e fa > $dir_work/tmp/binning/das_tool/semibin.tsv
+	Fasta_to_Scaffolds2Bin.sh -i $dir_work/tmp/binning/graphmb/_bins -e fa > $dir_work/tmp/binning/das_tool/graphmb.tsv
 	cp $dir_work/tmp/binning/metabinner/metabinner_res/metabinner_result.tsv $dir_work/tmp/binning/das_tool/metabinner.tsv
 
 	# Refine bins
@@ -1025,7 +1026,7 @@ else
 	if [ -f $dir_work/tmp/binning/bins_c/cbins/bin.c1.fa ]; then rsync -avr $dir_work/tmp/binning/bins_c/cbins/*.fa $dir_work/tmp/binning/bins; fi
 	cat $dir_work/tmp/binning/bins/*.fa > $dir_work/tmp/binning/contigs_binned.fasta
 	rsync -r $dir_work/tmp/binning/bins $dir_work/results/.
-	Fasta_to_Contig2Bin.sh -i $dir_work/tmp/binning/bins -e fa > $dir_work/tmp/binning/contig_bin.tsv
+	Fasta_to_Scaffolds2Bin.sh -i $dir_work/tmp/binning/bins -e fa > $dir_work/tmp/binning/contig_bin.tsv
 	source deactivate > /dev/null 2>&1
 	
 fi
@@ -1087,7 +1088,9 @@ else
 	source activate $dir_checkm > /dev/null 2>&1
 	export TMPDIR=$dir_tmp
 	export OPENBLAS_NUM_THREADS=1
-	checkm2 predict -x .fa -i $dir_work/tmp/binning/bins -o $dir_work/tmp/binning/checkm -t $threads
+	threads_checkm=$threads
+	if [ $threads_checkm -gt 40 ]; then threads_checkm=40; fi;
+	checkm2 predict -x .fa -i $dir_work/tmp/binning/bins -o $dir_work/tmp/binning/checkm -t $threads_checkm
 	source deactivate > /dev/null 2>&1
 	echo "Bin quality estimates with CheckM completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 fi
@@ -1156,11 +1159,11 @@ else
 	export dir_bakta_db=$dir_bakta_db
 	cd $dir_work/tmp/binning
 	
-	splits=$(($threads / 5))
-	if [ $splits -gt 20 ]; then splits=20; fi;
+	splits=$(($threads / 4))
+	if [ $splits -gt 25 ]; then splits=25; fi;
 	echo "Bakta parallelism set at $splits"
 	echo "Bakta parallelism set at $splits" >> $dir_work/tmp/log.txt
-	find $dir_work/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | sed 's/...$//' | xargs -i --max-procs=$splits bash -c 'bakta --compliant --db $dir_bakta_db --prefix {} --locus {} --keep-contig-headers --output bakta/{} --tmp-dir /user_data/mase/general/tmp --threads 5 bins/{}.fa --skip-crispr'
+	find $dir_work/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | sed 's/...$//' | xargs -i --max-procs=$splits bash -c 'bakta --compliant --db $dir_bakta_db --prefix {} --locus {} --keep-contig-headers --output bakta/{} --tmp-dir /user_data/mase/general/tmp --threads 4 bins/{}.fa --skip-crispr'
 	echo "Bin annotation with Bakta completed at $(date "+%Y-%m-%d %H:%M:%S")" >> $dir_work/tmp/log.txt
 	source deactivate > /dev/null 2>&1
 	cd $dir_work
