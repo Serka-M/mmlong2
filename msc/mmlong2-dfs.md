@@ -89,22 +89,22 @@
 | Category | Description |
 | --- | --- |
 | bin | Genome bin ID |
-| CDS_all | No. of protein coding genes by Prokka |
-| CDS_hyp | No. of hypothetical protein coding genes by Prokka |
-| tRNA_all | No. of all tRNA genes |
-| tRNA_all | No. of unique tRNA genes |
-| rRNA_16S | No. of 16S rRNA genes |
-| rRNA_23S | No. of 23S rRNA genes |
-| rRNA_5S | No. of 5S rRNA genes |
-| contigs | No. of contigs by CheckM  |
+| CDS_all | No. of protein coding genes reported by Bakta |
+| CDS_hyp | No. of hypothetical protein coding genes reported by Bakta |
+| tRNA_all | No. of all tRNA genes genes reported by Bakta |
+| tRNA_all | No. of unique tRNA genes genes reported by Bakta |
+| rRNA_16S | No. of 16S rRNA genes genes reported by Bakta |
+| rRNA_23S | No. of 23S rRNA genes genes reported by Bakta |
+| rRNA_5S | No. of 5S rRNA genes genes reported by Bakta |
+| contigs | No. of contigs |
 | Longest_contig_bp | Longest contig length |
 | Genome_size_bp | Genome bin size |
 | GC | Genome bin guanine-cytosine content |
 | N50_bp | Contig N50 |
 | [auN](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve |
 | N_per_100kb | Rate of Ns in a genome bin |
-| Completeness | Genome bin completeness estimate by CheckM |
-| Contamination | Genome bin contamination estimate by CheckM |
+| Completeness | Genome bin completeness estimate by CheckM2 |
+| Contamination | Genome bin contamination estimate by CheckM2 |
 | gunc_contamination | Fraction of single-copy-genes from other clades by GUNC |
 | gunc_status | Chimeric MAG status by GUNC |
 | gtdb_classification | Bin taxonomy by GTDB-tk (specific) |
