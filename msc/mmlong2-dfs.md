@@ -117,7 +117,10 @@
 | msa_percent | Percentage of amino acids in the multi-sequence alignment |
 | red_value | Relative Evolutionary Divergence for a distant match by GTDB-tk |
 | gtdb_warning | Warning message by GTB-tk |
-| silva_taxonomy | 16S rRNA classification to Silva database |
+| silva_classification | 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
+| silva_identity | Percent identity to the reference sequence |
+| midas_classification | 16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
+| midas_identity | Percent identity to the reference sequence |
 | mags_workflow_name | Experiment name (same as output directory) |
 | mags_workflow_date | Timestamp for dataframe generation |
 | mags_workflow_mode | Workflow mode (PacBio/Nanopore/Nanopore-Illumina) |
