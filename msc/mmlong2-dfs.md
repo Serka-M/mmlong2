@@ -103,6 +103,7 @@
 | N50_bp | Contig N50 |
 | [auN](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve |
 | N_per_100kb | Rate of Ns in a genome bin |
+| Coding_density | Genome bin coding density estimate by CheckM2 |
 | Completeness | Genome bin completeness estimate by CheckM2 |
 | Contamination | Genome bin contamination estimate by CheckM2 |
 | gunc_contamination | Fraction of single-copy-genes from other clades by GUNC |
