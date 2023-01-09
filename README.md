@@ -1,3 +1,5 @@
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/Serka-M/mmlong2/blob/main/LICENSE)
+
 <p align="center">
 <img align="center" width="165" height="165" src="msc/logo.png" alt="logo" style="zoom:100%;" />
 </p>
