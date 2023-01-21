@@ -1,7 +1,6 @@
 ![](https://img.shields.io/badge/Version-0.0.4-brightgreen.svg)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-brightgreen.svg)](https://github.com/Serka-M/mmlong2/blob/main/LICENSE)
 ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/Serka-M/mmlong2/v0.0.1)
-![](https://img.shields.io/github/last-commit/Serka-M//mmlong2?style=plastic)
 
 <p align="center">
 <img align="center" width="250" height="250" src="msc/mmlong2-logo.png" alt="logo" style="zoom:100%;" />
