@@ -162,7 +162,7 @@ then
 fi
 
 # Check input for threads
-if [ $threads -gt $(nproc) ]
+if [ $threads -gt $(nproc --all) ]
 then
 	echo "ERROR: More CPU threads allocated than available ($(nproc)). Aborting..."
 	exit 1
