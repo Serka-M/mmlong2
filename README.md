@@ -12,7 +12,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 **Overview of mmlong2 workflow in Nanopore-only mode:**
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
 
-**Installation (Conda):**
+**Installation (Conda):**<br/>
 A local [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment containing all the required software dependencies can be created by using the code chunk posted below. To acquire microbial genome taxonomy and annotation results, databases will have to be setup.
 ```
 conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=7.19.1 singularity=3.8.6 zenodo_get=1.3.4 pv=1.6.6 pigz=2.6 tar=1.34 -y
