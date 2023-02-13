@@ -54,9 +54,9 @@ EXTRA:
 <br/>
 
 **Overview of result files:**
-* `assembly.fasta` - assembled and polished metagenome with contigs longer than 1 kb
-* `assembly_graph.gfa` - metagenome assembly graph, showing links between contigs
+* `assembly.fasta` - assembled and polished metagenome
 * `rRNA.fa` - rRNA sequences, recovered from the polished metagenome
+* `rRNA_16S.fa` - 16S rRNA sequences, recovered from the polished metagenome
 * `<name>_contigs.tsv` - dataframe for metagenome contig metrics
 * `<name>_bins.tsv` - dataframe for automated binning results
 * `<name>_general.tsv` - workflow results, summarized into a single row
