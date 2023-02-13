@@ -89,26 +89,37 @@
 | Category | Description |
 | --- | --- |
 | bin | Genome bin ID |
-| CDS_all | No. of protein coding genes reported by Bakta |
-| CDS_hyp | No. of hypothetical protein coding genes reported by Bakta |
-| tRNA_all | No. of all tRNA genes genes reported by Bakta |
-| tRNA_all | No. of unique tRNA genes genes reported by Bakta |
-| rRNA_16S | No. of 16S rRNA genes genes reported by Bakta |
-| rRNA_23S | No. of 23S rRNA genes genes reported by Bakta |
-| rRNA_5S | No. of 5S rRNA genes genes reported by Bakta |
-| contigs | No. of contigs |
-| Longest_contig_bp | Longest contig length |
-| Genome_size_bp | Genome bin size |
-| GC | Genome bin guanine-cytosine content |
-| N50_bp | Contig N50 |
-| [auN](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve |
-| N_per_100kb | Rate of Ns in a genome bin |
-| Completeness | Genome bin completeness estimate by CheckM2 |
-| Contamination | Genome bin contamination estimate by CheckM2 |
-| Coding_density | Genome bin coding density estimate by CheckM2 |
+| Completeness | Genome bin completeness estimate, reported by CheckM2 |
+| Contamination | Genome bin contamination estimate, reported by CheckM2 |
+| Completeness_Model_Used | Model used by CheckM2 |
+| Coding_Density | Genome bin gene coding density, reported by CheckM2 |
+| Contig_N50 | Genome bin N50 (bp), reported by CheckM2 |
+| Average_Gene_Length | Average gene length, reported by CheckM2 |
+| Genome_Size | Genome bin size (bp), reported by CheckM2 |
+| GC_Content | Genome bin guanine-cytosine content (fraction), reported by CheckM2 |
+| Total_Coding_Sequences | Number of coding sequences, reported by CheckM2 |
+| contigs | Number of contigs, reported by Quast |
+| longest_contig | Length of the longest contig (bp), reported by Quast |
+| N90 | Genome bin N90 (bp), reported by Quast |
+| [auN](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve, reported by Quast |
+| N_per_100kb | Rate of Ns in a genome bin per 100 kb, reported by Quast |
+| cov | Average genome bin coverage, reported by CoverM |
+| r_abund | Average genome bin relative abundance (%), reported by CoverM  |
+| bakta_CDS_all | Number of protein coding genes, reported by Bakta |
+| bakta_CDS_hyp | Number of hypothetical protein coding genes, reported by Bakta |
+| bakta_tRNA_all | Number of all tRNA genes genes, reported by Bakta |
+| bakta_tRNA_uniq | Number of unique tRNA genes genes, reported by Bakta  |
+| bakta_16S | Number of 16S rRNA genes genes, reported by Bakta |
+| bakta_23S | Number of 23S rRNA genes genes, reported by Bakta |
+| bakta_5S | Number of 5S rRNA genes genes, reported by Bakta |
+| barrnap_16S | Number of 16S rRNA genes genes, reported by Barrnap |
+| barrnap_23S | Number of 23S rRNA genes genes, reported by Barrnap |
+| barrnap_5S | Number of 5S rRNA genes genes, reported by Barrnap |
+| MAG_status | Genome bin quality ranking according to [MIMAG standards](https://www.nature.com/articles/nbt.3893) |
+| cMAG_status | MAG circularity status |
 | gunc_contamination | Fraction of single-copy-genes from other clades by GUNC |
 | gunc_status | Chimeric MAG status by GUNC |
-| gtdb_classification | Bin taxonomy by GTDB-tk (specific) |
+| tax_gtdb| MAG taxonomy by GTDB-tk |
 | fastani_ani | Average nucleotide identity for a close match by GTDB-tk |
 | fastani_af | Alignment fraction for close match by GTDB-tk |
 | closest_placement_reference | ID for reference genome matched by GTDB-tk |
@@ -117,22 +128,15 @@
 | msa_percent | Percentage of amino acids in the multi-sequence alignment |
 | red_value | Relative Evolutionary Divergence for a distant match by GTDB-tk |
 | gtdb_warning | Warning message by GTB-tk |
-| silva_classification | 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
-| silva_identity | Percent identity to the reference sequence |
-| midas_classification | 16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
-| midas_identity | Percent identity to the reference sequence |
-| mags_workflow_name | Experiment name (same as output directory) |
-| mags_workflow_date | Timestamp for dataframe generation |
-| mags_workflow_mode | Workflow mode (PacBio/Nanopore/Nanopore-Illumina) |
-| MAG_status | Genome bin quality ranking according to [MIMAG standards](https://www.nature.com/articles/nbt.3893) |
-| cov_long | Bin coverage by long reads |
-| cov_ilm | Bin coverage by short reads |
-| Rabund_long | Bin relative abundance in long read data |
-| Rabund_ilm | Bin relative abundance in short read data  |
-| medak_var_n | No. of variants determined by Medaka |
-| medak_var_perc | Percent rate of variants determined by Medaka |
-| cMAG_status | No. of circular Genome bins |
-| kaiju_domain | Genome bin domain taxonomy by Kaiju |
-| kaiju_phylum | Genome bin phylum taxonomy by Kaiju |
+| tax_silva | MAG taxonomy based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
+| tophit_silva | Percent identity for best match to the reference sequence |
+| tax_midas | MAG taxonomy based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
+| tophit_midas | Percent identity for best match to the reference sequence |
+| var_n | Number of detected variants in the MAG |
+| var_perc | Fraction of MAG length as variants |
+| wf_name | Workflow output name |
+| wf_mode | Workflow mode |
+| wf_v | Workflow version |
+| wf_date | Date of workflow completion |
 
 [//]: # (Written by Mantas Sereika)
