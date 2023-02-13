@@ -12,6 +12,18 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 **Overview of mmlong2 workflow in Nanopore-only mode:**
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
 
+### Installation (Conda): 
+A local [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment containing all the required software dependencies can be created by using the code chunk posted below. To acquire microbial genome taxonomy and annotation results, databases will have to be setup.
+```
+conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=7.19.1 singularity=3.8.6 zenodo_get=1.3.4 pv=1.6.6 pigz=2.6 tar=1.34 -y
+conda activate ./mmlong2 || source activate ./mmlong2 && zenodo_get -r 7635029 -o mmlong2/bin 
+pv mmlong2/bin/sing-mmlong2-lite-*.tar.gz | pigz -dc - | tar xf - -C mmlong2/bin/.
+pv mmlong2/bin/sing-mmlong2-proc-*.tar.gz | pigz -dc - | tar xf - -C mmlong2/bin/.
+chmod +x mmlong2/bin/mmlong2
+```
+
+<br/>
+
 **Quick-start (AAU bioserver users):**
 ```
 export PATH=$PATH:/projects/microflora_danica/mmlong2
