@@ -34,7 +34,7 @@ MAIN INPUTS:
 -p      --processes             Number of processes/multi-threading (default: 3)
 -cov    --coverage              CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
 -run    --run_until             Run pipeline until a specified stage completes 
-				(e.g.  assembly polishing binning taxonomy annotation variants)
+				(e.g. assembly polishing binning taxonomy annotation variants)
 
 ADDITIONAL INPUTS:
 -tmp    --temporary_dir         Directory for temporary files (default: none)
