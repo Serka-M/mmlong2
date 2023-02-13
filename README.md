@@ -56,7 +56,6 @@ ADDITIONAL INPUTS:
 MISCELLANEOUS INPUTS:
 -h      --help                  Print help information
 -v      --version               Print workflow version number
-
 ```
 <br/>
 
