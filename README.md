@@ -27,29 +27,36 @@ mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [O
 
 **Full usage:**
 ```
-READ INPUTS: 
--np		Nanopore_reads.fastq
--il		llumina_reads.fastq
--pb		PacBio_HiFi_reads.fastq
+MAIN INPUTS:
+-np     --nanopore_reads        Path to Nanopore reads (default: none)
+-pb     --pacbio_reads          Path to PacBio HiFi reads (default: none)
+-o      --output_dir            Output directory name (default: mmlong2)
+-p      --processes             Number of processes/multi-threading (default: 3)
+-cov    --coverage              CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
+-run    --run_until             Run pipeline until a specified stage completes 
+				(e.g.  assembly polishing binning taxonomy annotation variants)
 
-OPTIONAL INPUTS:
--o		Output directory
--tmp		Temporary file directory
--t		Threads
--flye_min_cov	Set read coverage minimum for Flye assembly (default: 3)
--flye_min_ovlp	Set minimum read overlap for Flye assembly (default: 0/AUTO) 
--racon_rounds	Specify no. of Racon polishing rounds (default: 0)
--medaka_rounds	Specify no. of Medaka polishing rounds (default: 1)
--medaka_conf	Specify Medaka polishing model (default: r1041_e82_400bps_sup_g615)
--medaka_conf2	Specify Medaka variant model (default: r1041_e82_400bps_sup_variant_g615)
--cov		Comma-sperated dataframe of additional read data to be used for binning (NP/PB/IL,/path/to/reads.fastq)
--stop		Stop workflow after a specified stage completes:
-		"assembly" "polishing" "pre-binning" "binning" "qc" "annotation" "variants"
+ADDITIONAL INPUTS:
+-tmp    --temporary_dir         Directory for temporary files (default: none)
+-med1   --medaka_model_polish   Medaka polishing model (default: r1041_e82_400bps_sup_g615)
+-sem    --semibin_model         Binning model for SemiBin (default: global)
+-fmo    --flye_min_ovlp         Minimum overlap between reads used by Flye assembler (default: auto)
+-fmc    --flye_min_cov          Minimum initial contig coverage used by Flye assembler (default: 3)
+-mlc    --min_len_contig        Minimum assembly contig length (default: 3000)
+-mlb    --min_len_bin           Minimum genomic bin size (default: 250000)
+-slv    --silva                 Silva database to use (default: none)
+-mds    --midas                 Midas database to use (default: none)
+-gnc    --gunc                  Gunc database to use (default: none)
+-bkt    --bakta                 Bakta database to use (default: none)
+-kj     --kaiju                 Kaiju database to use (default: none)
+-gdb    --gtdb                  GTDB-tk database to use (default: none)
+-x1     --extra_inputs1         Extra inputs for the MAG production part of the Snakemake workflow (default: none)
+-x2     --extra_inputs2         Extra inputs for the MAG processing part of the Snakemake workflow (default: none)
 
-EXTRA:
--h OR -help	Display help file
--version	Display workflow version
--info		Display information file
+MISCELLANEOUS INPUTS:
+-h      --help                  Print help information
+-v      --version               Print workflow version number
+
 ```
 <br/>
 
