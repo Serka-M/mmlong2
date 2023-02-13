@@ -10,7 +10,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 <br/>
 
 **Overview of mmlong2 workflow in Nanopore-only mode:**
-<img src="msc/np_workflow.png" alt="mmlong2-np" style="zoom:100%;" />
+<img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
 
 **Quick-start (AAU bioserver users):**
 ```
