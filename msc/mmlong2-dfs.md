@@ -128,9 +128,9 @@
 | msa_percent | Percentage of amino acids in the multi-sequence alignment, reported by GTDB-tk |
 | red_value | Relative Evolutionary Divergence for a distant match, reported by GTDB-tk |
 | gtdb_warning | Warning message, reported by GTB-tk |
-| tax_silva | MAG taxonomy based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
+| tax_silva | MAG taxonomy, based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
 | tophit_silva | Percent identity for best match to the reference sequence, reported by vsearch |
-| tax_midas | MAG taxonomy based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
+| tax_midas | MAG taxonomy, based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
 | tophit_midas | Percent identity for best match to the reference sequence, reported by vsearch |
 | var_n | Number of detected variants in the MAG |
 | var_perc | Fraction of MAG length as variants |
