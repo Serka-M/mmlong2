@@ -60,27 +60,24 @@
 | Category | Description |
 | --- | --- |
 | contig | Contig ID |
-| contig_len_bp | Contig length |
-| cov_long | Contig coverage by long reads |
-| cov_long_var | Variance in contig coverage by long reads |
-| cov_ilm | Contig coverage by short reads|
-| cov_ilm_var | Variance in contig coverage by short reads |
-| GC | Contig guanine-cytosine percent content |
-| status_circular | Contig circularity status |
-| status_repeat | Contig repeat structure status |
-| graph_path | Links between contig and edges of the assembly graph |
-| medak_var_n | No. of variants determined by Medaka |
-| medak_var_perc | Percent rate of variants determined by Medaka |
-| domain | Contig domain taxonomy determined by Kaiju |
-| phylum | Contig phylum taxonomy determined by Kaiju |
-| class | Contig class taxonomy determined by Kaiju |
-| order | Contig order taxonomy determined by Kaiju |
-| family | Contig family taxonomy determined by Kaiju |
-| species | Contig species taxonomy determined by Kaiju (not very reliable) |
-| mags_workflow_name | Experiment name (same as output directory) |
-| mags_workflow_date | Timestamp for dataframe generation |
-| mags_workflow_mode | Workflow mode (PacBio/Nanopore/Nanopore-Illumina) |
+| len_bp | Contig length |
+| cov | Contig coverage by long reads |
+| status_circular | Contig circularity status, reported by Flye |
+| status_repeat | Contig repeat structure status, reported by Flye |
+| graph_path | Links between contigs and edges of the assembly graph, reported by Flye |
+| tax_kaiju | Contig taxonomy, reported by Kaiju |
+| tax_silva | Contig taxonomy, based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
+| tophit_silva | Percent identity for best match to the reference sequence, reported by vsearch |
+| tax_midas | Contig taxonomy, based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
+| tophit_midas | Percent identity for best match to the reference sequence, reported by vsearch |
 | bin | ID for genome bin that contains the contig |
+| GC | Contig guanine-cytosine percent content |
+| var_n | Number of detected variants in the contig |
+| var_perc | Fraction of contig length as variants |
+| wf_name | Workflow output name |
+| wf_mode | Workflow mode |
+| wf_v | Workflow version |
+| wf_date | Date of workflow completion |
 
 <br/>
 
