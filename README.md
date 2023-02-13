@@ -5,7 +5,7 @@
 Automated long-read metagenomics workflow, using either PacBio HiFi or Nanopore sequencing reads as input to generate characterized MAGs.
 The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst/mmlong).
 
-**Note:** At the moment, mmlong2 is an in-house pipeline at Aalborg University Bioservers. For a distributable and truncated version of the workflow, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
+**Note:** Multiple large-scale databases are utilized by mmlong2 for genome bin analysis. If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
 <br/>
 <br/>
 
