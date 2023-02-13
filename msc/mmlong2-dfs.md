@@ -117,21 +117,21 @@
 | barrnap_5S | Number of 5S rRNA genes genes, reported by Barrnap |
 | MAG_status | Genome bin quality ranking according to [MIMAG standards](https://www.nature.com/articles/nbt.3893) |
 | cMAG_status | MAG circularity status |
-| gunc_contamination | Fraction of single-copy-genes from other clades by GUNC |
-| gunc_status | Chimeric MAG status by GUNC |
-| tax_gtdb| MAG taxonomy by GTDB-tk |
-| fastani_ani | Average nucleotide identity for a close match by GTDB-tk |
-| fastani_af | Alignment fraction for close match by GTDB-tk |
-| closest_placement_reference | ID for reference genome matched by GTDB-tk |
-| closest_placement_ani | Top ANI match thats is < 95 % by GTDB-tk  |
-| closest_placement_af | Alignment fraction for matches with < 95 % ANI by GTDB-tk  |
-| msa_percent | Percentage of amino acids in the multi-sequence alignment |
-| red_value | Relative Evolutionary Divergence for a distant match by GTDB-tk |
-| gtdb_warning | Warning message by GTB-tk |
+| gunc_contamination | Fraction of single-copy-genes from other clades, reported by GUNC |
+| gunc_status | Chimeric MAG status, reported by GUNC |
+| tax_gtdb| MAG taxonomy, reported by GTDB-tk |
+| fastani_ani | Average nucleotide identity for a close match, reported by GTDB-tk |
+| fastani_af | Alignment fraction for close match, reported by GTDB-tk |
+| closest_placement_reference | ID for reference genome matched, reported by GTDB-tk |
+| closest_placement_ani | Top ANI match thats is < 95 %, reported by GTDB-tk  |
+| closest_placement_af | Alignment fraction for matches with < 95 % ANI, reported by GTDB-tk  |
+| msa_percent | Percentage of amino acids in the multi-sequence alignment, reported by GTDB-tk |
+| red_value | Relative Evolutionary Divergence for a distant match, reported by GTDB-tk |
+| gtdb_warning | Warning message, reported by GTB-tk |
 | tax_silva | MAG taxonomy based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
-| tophit_silva | Percent identity for best match to the reference sequence |
+| tophit_silva | Percent identity for best match to the reference sequence, reported by vsearch |
 | tax_midas | MAG taxonomy based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
-| tophit_midas | Percent identity for best match to the reference sequence |
+| tophit_midas | Percent identity for best match to the reference sequence, reported by vsearch  |
 | var_n | Number of detected variants in the MAG |
 | var_perc | Fraction of MAG length as variants |
 | wf_name | Workflow output name |
