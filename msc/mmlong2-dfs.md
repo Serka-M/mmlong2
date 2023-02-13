@@ -4,45 +4,29 @@
 
 | Category | Description |
 | --- | --- |
+| reads_n | Number of reads, reported by Nanoq |
+| reads_size_bp | Read yield, reported by Nanoq |
+| reads_N50_bp | Read N50, reported by Nanoq |
+| reads_len_max_bp | Length of the longest read, reported by Nanoq |
+| reads_len_min_bp | Length of the shortest read, reported by Nanoq |
+| reads_mean_len_bp | Mean read length, reported by Nanoq |
+| reads_median_len_bp | Median read length, reported by Nanoq |
+| reads_mean_q | Mean read Phred quality score, reported by Nanoq |
+| reads_median_q | Median read Phred quality score, reported by Nanoq |
 | assembly_size_bp | Metagenome assembly size, reported by Flye |
-| assembly_contigs_n | No. of contigs, reported by Flye |
+| assembly_contigs_n | Number of contigs, reported by Flye |
 | assembly_contigs_N50_bp | Contig N50, reported by Flye |
 | assembly_contigs_meanCOV | Mean contig coverage, reported by Flye |
 | assembly_reads_mapped | Fraction of read data that maps to the assembly, reported by Flye |
-| num_reads_ilm | No. of short reads |
-| bp_total_ilm | Short read yield |
-| N50_ilm | Short read N50 |
-| longest_reads_ilm | Length for the longest short read |
-| shortest_reads_ilm | Length for the shortest short read |
-| mean_length_ilm | Mean short read length |
-| median_length_ilm | Median short read length |
-| mean_q_ilm | Mean short read Phred quality score |
-| median_q_ilm | Median short read Phred quality score |
-| num_reads_long | No. of long reads |
-| bp_total_long | Long read yield |
-| N50_long | Long read N50 |
-| longest_reads_long | Length for the longest long read |
-| shortest_read_long | Length for the shortest long read |
-| mean_length_long | Mean long read length |
-| median_length_long | Median long read length |
-| mean_q_long | Mean long read Phred quality score |
-| median_q_long | Median long read Phred quality score |
-| mags_workflow_name | Experiment name (same as output directory) |
-| mags_workflow_date | Timestamp for dataframe generation |
-| mags_workflow_mode | Workflow mode (PacBio/Nanopore/Nanopore-Illumina) |
-| contigs_circ | No. of circular contigs |
-| contigs_circ_above_HalfMb | No. of circular contigs that are above 0.5 Mb |
-| contigs_abund_bac | Relative bacterial abundance, based on Kaiju classification |
-| contigs_abund_arc | Relative archaeal abundance, based on Kaiju classification |
-| all_mags | Total no. of genome bins |
-| circ_mags | No. of circular genome bins |
-| hq_mags | No. of high-quality genome bins |
-| mq_mags | No. of medium-quality genome bins |
-| lq_mags | No. of low-quality genome bins |
-| contaminated_mags | No. of contaminated genome bins |
+| contigs_circ | Number of circular contigs |
+| all_mags | Total number of genome bins |
+| circ_mags | Number of circular genome bins |
+| hq_mags | Number of high-quality genome bins |
+| mq_mags | Number of medium-quality genome bins |
+| lq_mags | Number of low-quality genome bins |
+| contaminated_mags | Number of contaminated genome bins |
 | asm_binned | Percent of assembly size that was binned |
-| Rabund_binned_long | Percent long read abundance explained by bins |
-| Rabund_binned_ilm | Percent short read abundance explained by bins |
+| r_abund_bins | Percent of read relative abundance explained by the bins |
 | mag_cov_med_hq_mq | Median coverage of high-quality and medium-quality bins |
 | mag_cov_med_hq | Median coverage of high-quality bins |
 | mag_cov_med_mq | Median coverage of medium-quality binss |
@@ -52,6 +36,10 @@
 | contigs_med_hq_mq | Median no. of contigs in high-quality and medium-quality bins |
 | contigs_med_hq | Median no. of contigs in high-quality bins |
 | contigs_med_mq | Median no. of contigs in medium-quality binss |
+| wf_name | Workflow output name |
+| wf_mode | Workflow mode |
+| wf_v | Workflow version |
+| wf_date | Date of workflow completion |
 
 <br/>
 
