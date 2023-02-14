@@ -26,14 +26,15 @@ chmod +x mmlong2/bin/mmlong2
 
 **Quick-start (AAU bioserver users):**
 ```
-export PATH=$PATH:/projects/microflora_danica/mmlong2
+module load Miniconda3/4.9.2-foss-2019a
+source activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.0
 mmlong2 -h
 ```
 <br/>
 
 **Usage example for hybrid (Nanopore/Illumina) mode:**
 ```
-mmlong2 -np [Nanopore_reads.fastq] -il [Illumina_reads.fastq] -t [Threads] -o [Output_dir]
+mmlong2 -np [Nanopore_reads.fastq] -p [Processes/Threads] -o [Output_dir]
 ```
 <br/>
 
