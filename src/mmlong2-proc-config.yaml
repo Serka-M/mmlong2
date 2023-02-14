@@ -1,0 +1,17 @@
+version: 0.9.0
+sample: mmlong2
+fastq: none
+sing: sing
+proc: 3
+mode: Nanopore-simplex
+minimap_ram: 50
+medaka_split: 30
+medak_mod_pol: r1041_e82_400bps_sup_variant_g615
+bakta_split: 25
+db_bakta: /projects/microflora_danica/mmlong2/db/bakta_1.6.0/db
+db_gtdb: /databases/gtdb-tk/release207_v2
+db_kaiju: /projects/microflora_danica/mmlong2/db/kaiju_db_nr_2022-03-10
+db_silva: /databases/SILVA/SILVA_138.1_SSURef_NR99_tax_silva_trunc.sintax.fasta
+db_midas: /projects/microflora_danica/mmlong2/db/MiDAS5.0_20211221_FLASVs_w_sintax.fa
+db_gunc: /projects/microflora_danica/mmlong2/db/gunc_1.0.5/gunc_db_progenomes2.1.dmnd
+db_barrnap: arc
