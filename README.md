@@ -32,7 +32,7 @@ mmlong2 -h
 ```
 <br/>
 
-**Usage example for hybrid (Nanopore/Illumina) mode:**
+**Usage example for Nanopore-only mode:**
 ```
 mmlong2 -np [Nanopore_reads.fastq] -p [Processes/Threads] -o [Output_dir]
 ```
