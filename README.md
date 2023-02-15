@@ -87,6 +87,7 @@ MISCELLANEOUS INPUTS:
 **Additional documentation:**
 * [Dataframe description](msc/mmlong2-dfs.md)
 * [Dependency list](msc/mmlong2-dep.md)
+* [Detabase setup](msc/mmlong2-db.md)
 <br/>
 
 **Comments:**
