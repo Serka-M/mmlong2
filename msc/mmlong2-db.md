@@ -39,14 +39,14 @@ gzip -d gunc_db_progenomes2.1.dmnd.gz
 
 **GTDB (Genome Taxonomy Database) database for microbial genome taxonomy**
 ```
-wget https://data.gtdb.ecogenomic.org/releases/release207/207.0/auxillary_files/gtdbtk_r207_v2_data.tar.gz
-tar -xvzf gtdbtk_r207_v2_data.tar.gz
+wget https://data.gtdb.ecogenomic.org/releases/release214/214.0/auxillary_files/gtdbtk_r214_data.tar.gz 
+tar -xvzf gtdbtk_r214_data.tar.gz 
 ```
 <br/>
 
 **Bakta databases for microbial genome annotation (requires [AMRFinderPlus](https://github.com/ncbi/amr/wiki))**
 ```
-wget https://zenodo.org/record/7025248/files/db.tar.gz
+wget https://zenodo.org/record/7669534/files/db.tar.gz
 tar -xvzf db.tar.gz
 amrfinder_update --database db/amrfinderplus-db
 ```
