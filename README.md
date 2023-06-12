@@ -15,8 +15,8 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 **Installation (Conda):**<br/>
 A local [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment containing all the required software dependencies can be created by using the code chunk posted below. To acquire microbial genome taxonomy and annotation results, databases will have to be [setup](msc/mmlong2-db.md).
 ```
-conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=7.19.1 singularity=3.8.6 zenodo_get=1.3.4 pv=1.6.6 pigz=2.6 tar=1.34 -y
-conda activate ./mmlong2 || source activate ./mmlong2 && zenodo_get -r 7635029 -o mmlong2/bin 
+conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=7.26.0 singularity=3.8.6 zenodo_get=1.3.4 pv=1.6.6 pigz=2.6 tar=1.34 -y
+conda activate ./mmlong2 || source activate ./mmlong2 && zenodo_get -r 8027235 -o mmlong2/bin 
 pv mmlong2/bin/sing-mmlong2-lite-*.tar.gz | pigz -dc - | tar xf - -C mmlong2/bin/.
 pv mmlong2/bin/sing-mmlong2-proc-*.tar.gz | pigz -dc - | tar xf - -C mmlong2/bin/.
 chmod +x mmlong2/bin/mmlong2
@@ -27,7 +27,7 @@ chmod +x mmlong2/bin/mmlong2
 **Quick-start (AAU bioserver users):**
 ```
 module load Miniconda3/4.9.2-foss-2019a
-source activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.0
+source activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
 mmlong2 -h
 ```
 <br/>
@@ -51,7 +51,8 @@ MAIN INPUTS:
 
 ADDITIONAL INPUTS:
 -tmp    --temporary_dir         Directory for temporary files (default: none)
--med1   --medaka_model_polish   Medaka polishing model (default: r1041_e82_400bps_sup_g615)
+-med1   --medaka_model_polish   Medaka polishing model (default: r1041_e82_400bps_sup_v4.2.0)
+-med2	--medaka_model_variant	Medaka variant calling model (default: r1041_e82_400bps_sup_variant_v4.2.0)
 -sem    --semibin_model         Binning model for SemiBin (default: global)
 -fmo    --flye_min_ovlp         Minimum overlap between reads used by Flye assembler (default: auto)
 -fmc    --flye_min_cov          Minimum initial contig coverage used by Flye assembler (default: 3)
