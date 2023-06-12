@@ -83,8 +83,8 @@
 | Genome_Size | Genome bin size (bp), reported by CheckM2 |
 | GC_Content | Genome bin guanine-cytosine content (fraction), reported by CheckM2 |
 | Total_Coding_Sequences | Number of coding sequences, reported by CheckM2 |
-| contigs | Number of contigs, reported by Quast |
-| longest_contig | Length of the longest contig (bp), reported by Quast |
+| Total_Contigs | Number of contigs, reported by CheckM2 |
+| Max_Contig_Length | Length of the longest contig (bp), reported by CheckM2 |
 | N90 | Genome bin N90 (bp), reported by Quast |
 | [auN](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve, reported by Quast |
 | N_per_100kb | Rate of Ns in a genome bin per 100 kb, reported by Quast |
