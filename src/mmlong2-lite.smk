@@ -12,9 +12,12 @@ sample=config["sample"]
 flye_cov=config["flye_cov"]
 flye_ovlp=config["flye_ovlp"]
 min_contig_len=config["min_contig_len"]
+max_contig_con=config["max_contig_con"]
+inc_contig_len=config["inc_contig_len"]
 medaka_split=config["medaka_split"]
 medak_mod_pol=config["medak_mod_pol"]
 minimap_ram=config["minimap_ram"]
+minimap_ref=config["minimap_ref"]
 min_mag_len=config["min_mag_len"]
 semibin_mod=config["semibin_mod"]
 semibin_mods=['human_gut', 'dog_gut', 'ocean', 'soil', 'cat_gut', 'human_oral', 'mouse_gut', 'pig_gut', 'built_environment', 'wastewater', 'chicken_caecum', 'global']
@@ -71,33 +74,33 @@ rule Finalise:
         """
 	printf "software,version\n" > {output.dep}
 	printf "mmlong2-lite,{wf_v}\n" >> {output.dep}
-	printf "Snakemake,7.19.1\n" >> {output.dep}
+	printf "Snakemake,7.26.0\n" >> {output.dep}
 	printf "Singularity,3.8.6\n" >> {output.dep}
 	printf "R,4.2.2\n" >> {output.dep}
-	printf "Minimap2,2.24\n" >> {output.dep}
+	printf "Minimap2,2.26\n" >> {output.dep}
 	printf "SAMtools,1.16.1\n" >> {output.dep}
-	printf "SeqKit,2.3.1\n" >> {output.dep}
-	printf "Flye,2.9.1\n" >> {output.dep}
-	printf "Medaka,1.7.2\n" >> {output.dep}
+	printf "SeqKit,2.4.0\n" >> {output.dep}
+	printf "Flye,2.9.2\n" >> {output.dep}
+	printf "Medaka,1.8.0\n" >> {output.dep}
 	printf "Tiara,1.0.3\n" >> {output.dep}
 	printf "MetaBAT2,2.15\n" >> {output.dep}
 	printf "SemiBin,1.5\n" >> {output.dep}
 	printf "GraphMB,0.1.5\n" >> {output.dep}
 	printf "DAS_Tool,1.1.3\n" >> {output.dep}
-	printf "CheckM2,1.0.0\n" >> {output.dep}
+	printf "CheckM2,1.0.2\n" >> {output.dep}
 	printf "CoverM,0.6.1\n" >> {output.dep}
 	printf "QUAST,5.2.0\n" >> {output.dep}
 	cp {output.dep} {sample}/results/dependencies.csv
 	cp -r {sample}/tmp/binning/bins {sample}/results/.
 	
 	quast.py {sample}/tmp/binning/bins/*.fa -o {sample}/tmp/binning/quast -t {proc}
-	cut -f1,14,15,19,20,23 {sample}/tmp/binning/quast/transposed_report.tsv | sed 1d - > {sample}/tmp/binning/quast.tsv
+	cut -f1,19,20,23 {sample}/tmp/binning/quast/transposed_report.tsv | sed 1d - > {sample}/tmp/binning/quast.tsv
 	coverm genome -b {sample}/tmp/binning/mapping_tmp/1_cov.bam -d {sample}/tmp/binning/bins -x fa -m mean -o {sample}/tmp/binning/bin_cov.tsv
 	coverm genome -b {sample}/tmp/binning/mapping_tmp/1_cov.bam -d {sample}/tmp/binning/bins -x fa -m relative_abundance -o {sample}/tmp/binning/bin_abund.tsv
 
 	R --slave --silent --args << 'df'
 	quast <- read.delim("{sample}/tmp/binning/quast.tsv", sep="\t", header=F)
-	colnames(quast) <- c("bin","contigs","longest_contig","N90","auN","N_per_100kb")
+	colnames(quast) <- c("bin","N90","auN","N_per_100kb")
 	abund <- read.delim("{sample}/tmp/binning/bin_abund.tsv", sep="\t", header=T)
 	colnames(abund) <- c("bin","r_abund")
 	cov <- read.delim("{sample}/tmp/binning/bin_cov.tsv", sep="\t", header=T)
@@ -133,7 +136,7 @@ rule Assembly:
         """
 
 rule Polishing:
-    conda: "env_1"
+    conda: "env_2"
     input:
         expand("{sample}/tmp/flye/assembly.fasta",sample=sample)
     output:
@@ -210,8 +213,8 @@ rule Coverage_calculation:
 	elif [ $type == "NP" ]; then mapping="map-ont" && ident={np_map_ident};
 	elif [ $type == "PB" ]; then mapping="map-hifi" && ident={pb_map_ident}; fi
 
-	if [ ! -f $(pwd)/{sample}/tmp/binning/metabat_tmp/"${{count}}_metabat.tsv" ]; then 
-	minimap2  -I {minimap_ram}G -K 10G -t {proc} -ax $mapping {sample}/tmp/polishing/asm_pol_lenfilt.fasta $reads | samtools view --threads $(({proc} / 2)) -Sb -F 2308 - | samtools sort --threads $(({proc} / 2)) - > $(pwd)/{sample}/tmp/binning/mapping_tmp/"${{count}}_cov.bam"
+	if [ ! -f $(pwd)/{sample}/tmp/binning/cov_tmp/"${{count}}_metabat.tsv" ]; then 
+	minimap2  -I {minimap_ram}G -K {minimap_ref}G -t {proc} -ax $mapping {sample}/tmp/polishing/asm_pol_lenfilt.fasta $reads | samtools view --threads $(({proc} / 2)) -Sb -F 2308 - | samtools sort --threads $(({proc} / 2)) - > $(pwd)/{sample}/tmp/binning/mapping_tmp/"${{count}}_cov.bam"
 	jgi_summarize_bam_contig_depths $(pwd)/{sample}/tmp/binning/mapping_tmp/"${{count}}_cov.bam" --percentIdentity $ident --outputDepth $(pwd)/{sample}/tmp/binning/cov_tmp/"${{count}}_cov.tsv"	
 	cov_init=$(pwd)/{sample}/tmp/binning/cov_tmp/${{count}}_cov.tsv
 	cov_metabat=$(pwd)/{sample}/tmp/binning/cov_tmp/${{count}}_metabat.tsv
@@ -235,7 +238,7 @@ rule Binning_prep_1:
     shell:
         """
 	if [ ! -d "$(pwd)/{sample}/tmp/binning/round_{params}" ]; then mkdir {sample}/tmp/binning/round_{params}; fi
-	awk -F "\t" '{{ if (($2 >= {min_contig_len}) && ($4 == "N")) {{print $1}} }}' {sample}/tmp/flye/assembly_info.txt | sort > {output.id1}
+	awk -F "\t" '{{ if (($2 >= {min_contig_len}) && ($4 == "N")) {{print $1, $2, gsub(/,/,"",$8)}} }}' {sample}/tmp/flye/assembly_info.txt | awk -F " " '{{ if (($2 >= {inc_contig_len}) || ($3 <= {max_contig_con})) {{print $1}} }}' | sort > {output.id1}
 	seqkit grep -f {output.id1} {sample}/tmp/eukfilt/asm_pol_lenfilt_eukfilt.fasta | seqkit sort --by-name - > {output.contigs}
 	grep ">" {output.contigs} | cut -c2- > {output.id2}
 	head -n1 {sample}/tmp/binning/metabat_cov.tsv > {output.cov}
@@ -257,7 +260,7 @@ rule Binning_MetaBat2_1:
         """
 
 rule Binning_SemiBin_1:
-    conda: "env_2"
+    conda: "env_3"
     params: 1
     input:
         expand("{sample}/tmp/binning/round_1/contigs_lin.fasta",sample=sample)
@@ -269,7 +272,7 @@ rule Binning_SemiBin_1:
         """
 
 rule Binning_GraphMB_1:
-    conda: "env_3"
+    conda: "env_4"
     params: 1
     input:
         expand("{sample}/tmp/binning/round_1/contigs_lin.fasta",sample=sample)
@@ -306,7 +309,7 @@ rule Binning_DASTool_1:
         """
 
 rule Binning_QC_1:
-    conda: "env_4"
+    conda: "env_5"
     params: 1 
     input:
         expand("{sample}/tmp/binning/round_1/das_tool/output_DASTool_scaffolds2bin.txt",sample=sample)
@@ -349,7 +352,7 @@ rule Binning_MetaBat2_2:
         """
 
 rule Binning_SemiBin_2:
-    conda: "env_2"
+    conda: "env_3"
     params: 2
     input:
         expand("{sample}/tmp/binning/round_2/contigs_lin.fasta",sample=sample)
@@ -361,7 +364,7 @@ rule Binning_SemiBin_2:
         """
 
 rule Binning_GraphMB_2:
-    conda: "env_3"
+    conda: "env_4"
     params: 2
     input:
         expand("{sample}/tmp/binning/round_2/contigs_lin.fasta",sample=sample)
@@ -398,7 +401,7 @@ rule Binning_DASTool_2:
         """
 
 rule Binning_QC_2:
-    conda: "env_4"
+    conda: "env_5"
     params: 2 
     input:
         expand("{sample}/tmp/binning/round_2/das_tool/output_DASTool_scaffolds2bin.txt",sample=sample)
@@ -441,7 +444,7 @@ rule Binning_MetaBat2_3:
         """
 
 rule Binning_SemiBin_3:
-    conda: "env_2"
+    conda: "env_3"
     params: 3
     input:
         expand("{sample}/tmp/binning/round_3/contigs_lin.fasta",sample=sample)
@@ -453,7 +456,7 @@ rule Binning_SemiBin_3:
         """
 
 rule Binning_GraphMB_3:
-    conda: "env_3"
+    conda: "env_4"
     params: 3
     input:
         expand("{sample}/tmp/binning/round_3/contigs_lin.fasta",sample=sample)
@@ -490,7 +493,7 @@ rule Binning_DASTool_3:
         """
 
 rule Binning_QC_3:
-    conda: "env_4"
+    conda: "env_5"
     params: 3
     input:
         expand("{sample}/tmp/binning/round_3/das_tool/output_DASTool_scaffolds2bin.txt",sample=sample)
@@ -533,7 +536,7 @@ rule Binning_MetaBat2_4:
         """
 
 rule Binning_QC_4:
-    conda: "env_4"
+    conda: "env_5"
     params: 4
     input:
         expand("{sample}/tmp/binning/round_4/metabat2/bins_metabat2",sample=sample)

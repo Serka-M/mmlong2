@@ -24,6 +24,7 @@ medak_mod_pol=$(grep medak_mod_pol $config1 | cut -d" " -f2 | tr -d '\r')
 min_contig_len=$(grep min_contig_len $config1 | cut -d" " -f2 | tr -d '\r')
 min_mag_len=$(grep min_mag_len $config1 | cut -d" " -f2 | tr -d '\r')
 semibin_mod=$(grep semibin_mod $config1 | cut -d" " -f2 | tr -d '\r')
+medak_mod_var=$(grep medak_mod_var $config2 | cut -d" " -f2 | tr -d '\r')
 db_silva=$(grep db_silva $config2 | cut -d" " -f2 | tr -d '\r')
 db_midas=$(grep db_midas $config2 | cut -d" " -f2 | tr -d '\r')
 db_gunc=$(grep db_gunc $config2 | cut -d" " -f2 | tr -d '\r')
@@ -54,6 +55,7 @@ MAIN INPUTS:
 ADDITIONAL INPUTS:
 -tmp	--temporary_dir		Directory for temporary files (default: none)
 -med1	--medaka_model_polish	Medaka polishing model (default: $medak_mod_pol)
+-med2	--medaka_model_variant	Medaka variant calling model (default: $medak_mod_var)
 -sem	--semibin_model		Binning model for SemiBin (default: $semibin_mod)
 -fmo	--flye_min_ovlp		Minimum overlap between reads used by Flye assembler (default: auto)
 -fmc	--flye_min_cov		Minimum initial contig coverage used by Flye assembler (default: $flye_min_cov)
@@ -88,7 +90,8 @@ while test $# -gt 0; do
                 -tmp | --temporary_dir) shift; tmp=$1; shift;;
                 -fmo | --flye_min_ovlp) shift; flye_min_ovlp=$1; shift;;
                 -fmc | --flye_min_cov) shift; flye_min_cov=$1; shift;;
-                -med1 | --medaka_model_polish) shift; medak_mod_pol=$1; shift;;				
+                -med1 | --medaka_model_polish) shift; medak_mod_pol=$1; shift;;	
+                -med2 | --medaka_model_variant) shift; medak_mod_var=$1; shift;;			
                 -mlc | --min_len_contig) shift; min_contig_len=$1; shift;;
                 -mlb | --min_len_bin) shift; min_mag_len=$1; shift;;
                 -sem | --semibin_model) shift; semibin_mod=$1; shift;;
@@ -159,7 +162,7 @@ if [ ! -d $db_bakta ]; then echo "ERROR: Provided Bakta database not found at $d
 # Run snakemake workflow for MAG processing
 if [ ! $rule2 == "OFF" ]; then
 singularity_binds="-B $(pwd) -B $TMPDIR -B $(dirname $fastq) -B $(dirname $db_silva) -B $(dirname $db_midas) -B $(dirname $db_gunc) -B $db_bakta -B $db_gtdb -B $db_kaiju"
-snakemake --use-singularity --use-conda --singularity-args "$singularity_binds" --cores 1 --nolock -s $snakefile2 --configfile $config2 -R $rule2 --until $rule2 --config sing=$sing2 sample=$sample fastq=$fastq proc=$proc mode=$mode db_silva=$db_silva db_midas=$db_midas db_gunc=$db_gunc db_bakta=$db_bakta db_kaiju=$db_kaiju db_gtdb=$db_gtdb $extra2; fi
+snakemake --use-singularity --use-conda --singularity-args "$singularity_binds" --cores 1 --nolock -s $snakefile2 --configfile $config2 -R $rule2 --until $rule2 --config sing=$sing2 sample=$sample fastq=$fastq proc=$proc mode=$mode medak_mod_var=$medak_mod_var db_silva=$db_silva db_midas=$db_midas db_gunc=$db_gunc db_bakta=$db_bakta db_kaiju=$db_kaiju db_gtdb=$db_gtdb $extra2; fi
 
 # Result info for early stoppage
 if [ $stage == "taxonomy" ]; then echo "End of partial workflow. Taxonomic classification results can be found at $sample/tmp/taxonomy"; fi

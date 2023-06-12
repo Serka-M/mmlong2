@@ -11,7 +11,7 @@ fastq=config["fastq"]
 sample=config["sample"]
 minimap_ram=config["minimap_ram"]
 medaka_split=config["medaka_split"]
-medak_mod_pol=config["medak_mod_pol"]
+medak_mod_var=config["medak_mod_var"]
 bakta_split=config["bakta_split"]
 db_bakta=config["db_bakta"]
 db_gtdb=config["db_gtdb"]
@@ -74,12 +74,12 @@ rule Finalise:
         printf "software,version\n" > {output.dep1}
 	printf "mmlong2,{wf_v}\n" >> {output.dep1}
 	printf "Kaiju,1.9.2\n" >> {output.dep1}
-	printf "Bakta,1.6.1\n" >> {output.dep1}
+	printf "Bakta,1.8.1\n" >> {output.dep1}
 	printf "Gunc,1.0.5\n" >> {output.dep1}
-	printf "NanoQ,0.9.0\n" >> {output.dep1}
+	printf "NanoQ,0.10.0\n" >> {output.dep1}
 	printf "Vsearch,2.22.1\n" >> {output.dep1}
 	printf "Barrnap,0.9\n" >> {output.dep1}
-	printf "GTDBTk,2.1.1\n" >> {output.dep1}
+	printf "GTDBTk,2.3.0\n" >> {output.dep1}
 	cat {output.dep1} > {output.dep2}
 	awk '{{if(NR>2)print}}' {sample}/tmp/binning/dep_mmlong2-lite.csv >> {output.dep2}
 
@@ -188,7 +188,7 @@ rule ExtraQC_microdiversity:
 	for file in {sample}/tmp/extra_qc/medaka/contigs_id_*.txt; do filename=lin_$(basename $file)
 	awk 'BEGIN {{ ORS = " " }} {{ print }}' $file > {sample}/tmp/extra_qc/medaka/$filename; done
 	mini_align -I {minimap_ram}G -i {fastq} -r {sample}/tmp/polishing/asm_pol_lenfilt.fasta -m -p {sample}/tmp/extra_qc/medaka/calls_to_draft -t {proc}
-	find {sample}/tmp/extra_qc/medaka -type f -name "lin_*" | xargs -i --max-procs=$splits bash -c 'list=$(head -1 {{}}) && file=$(basename {{}} | sed 's/\.txt//') && medaka consensus {sample}/tmp/extra_qc/medaka/calls_to_draft.bam {sample}/tmp/extra_qc/medaka/$file.hdf --model {medak_mod_pol} --batch 200 --threads 2 --region $list'
+	find {sample}/tmp/extra_qc/medaka -type f -name "lin_*" | xargs -i --max-procs=$splits bash -c 'list=$(head -1 {{}}) && file=$(basename {{}} | sed 's/\.txt//') && medaka consensus {sample}/tmp/extra_qc/medaka/calls_to_draft.bam {sample}/tmp/extra_qc/medaka/$file.hdf --model {medak_mod_var} --batch 200 --threads 2 --region $list'
 	medaka variant {sample}/tmp/polishing/asm_pol_lenfilt.fasta {sample}/tmp/extra_qc/medaka/*.hdf {sample}/tmp/extra_qc/medaka/medaka_var.vcf
 	cat {sample}/tmp/extra_qc/medaka/medaka_var.vcf | awk '$1 ~ /^#/ {{print $0;next}} {{print $0 | "sort -k1,1 -k2,2n"}}' > {sample}/tmp/extra_qc/medaka/medaka_var_sort.vcf
 	awk -F "\t" '{{ if ($7 == "PASS") {{print $1}} }}' {sample}/tmp/extra_qc/medaka/medaka_var_sort.vcf | uniq -c - | tr -d " \t" | sed 's/contig/,contig/g' | awk -F, '{{print $2,$1}}' OFS='\t' > {output.var}
@@ -299,18 +299,18 @@ rule Annotation_MAGs:
 	if [ ! -d "$(pwd)/{sample}/tmp/annotation" ]; then mkdir {sample}/tmp/annotation; fi
 	if [ ! -d "$(pwd)/{sample}/tmp/annotation/tmp" ]; then mkdir {sample}/tmp/annotation/tmp; fi
 	splits=$(({proc} / 3)) && if [ $splits -gt {bakta_split} ]; then splits={bakta_split}; fi;
-	find {sample}/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | sed 's/...$//' | xargs -i --max-procs=$splits bash -c 'bakta --compliant --db {db_bakta} --prefix {{}} --output {sample}/tmp/annotation/bakta/{{}} --keep-contig-headers --tmp-dir {sample}/tmp/annotation/tmp --threads 3 {sample}/tmp/binning/bins/{{}}.fa --skip-crispr'
+	find {sample}/tmp/binning/bins -type f -name "*.fa" -printf '%f\n' | sed 's/...$//' | xargs -i --max-procs=$splits bash -c 'if [ ! -f "$(pwd)/{sample}/tmp/annotation/bakta/{{}}/{{}}.tsv" ]; then bakta --compliant --db {db_bakta} --prefix {{}} --output {sample}/tmp/annotation/bakta/{{}} --keep-contig-headers --tmp-dir {sample}/tmp/annotation/tmp --threads 3 {sample}/tmp/binning/bins/{{}}.fa --meta --skip-crispr --force; fi'
 
 	echo "bin,bakta_CDS_all,bakta_CDS_hyp,bakta_tRNA_all,bakta_tRNA_uniq,bakta_16S,bakta_23S,bakta_5S" > {output.df}
 	for file in {sample}/tmp/annotation/bakta/*; do
 	name=$(basename $file )
 	CDS_all=$(awk -F "\t" '{{ if ($2 == "cds") {{print $2}} }}' $file/${{name}}.tsv | grep -c "cds" -) || true
 	CDS_hyp=$(awk -F "\t" '{{ if ($2 == "cds") {{print $8}} }}' $file/${{name}}.tsv | grep -c "hypothetical protein" -) || true
-	tRNA_all=$(awk -F "\t" '{{ if ($2 == "tRNA") {{print $7}} }}' $file/${{name}}.tsv | sed 's/fMet_trna/Met_trna/' - | sed 's/Ile2_trna/Ile_trna/' - | sed 's/SeC_trna/Cys_trna/' - | grep -c "trna" -) || true
-	tRNA_uniq=$(awk -F "\t" '{{ if ($2 == "tRNA") {{print $7}} }}' $file/${{name}}.tsv | sed 's/fMet_trna/Met_trna/' - | sed 's/Ile2_trna/Ile_trna/' - | sed 's/SeC_trna/Cys_trna/' - | sort -u - | grep -c "trna" -) || true
-	rRNA_16S=$(awk -F "\t" '{{ if ($7 == "16S_rrna") {{print $2}} }}' $file/${{name}}.tsv | grep -c "rRNA" -) || true
-	rRNA_23S=$(awk -F "\t" '{{ if ($7 == "23S_rrna") {{print $2}} }}' $file/${{name}}.tsv | grep -c "rRNA" -) || true
-	rRNA_5S=$(awk -F "\t" '{{ if ($7 == "5S_rrna") {{print $2}} }}' $file/${{name}}.tsv | grep -c "rRNA" -) || true
+	tRNA_all=$(awk -F "\t" '{{ if ($2 == "tRNA") {{print $7}} }}' $file/${{name}}.tsv | grep -c "trn" -) || true
+	tRNA_uniq=$(awk -F "\t" '{{ if ($2 == "tRNA") {{print $7}} }}' $file/${{name}}.tsv | sort -u - | grep -c "trn" -) || true
+	rRNA_16S=$(awk -F "\t" '{{ if ($7 == "rrs") {{print $2}} }}' $file/${{name}}.tsv | grep -c "rRNA" -) || true
+	rRNA_23S=$(awk -F "\t" '{{ if ($7 == "rrl") {{print $2}} }}' $file/${{name}}.tsv | grep -c "rRNA" -) || true
+	rRNA_5S=$(awk -F "\t" '{{ if ($7 == "rrf") {{print $2}} }}' $file/${{name}}.tsv | grep -c "rRNA" -) || true
 	echo "$name,$CDS_all,$CDS_hyp,$tRNA_all,$tRNA_uniq,$rRNA_16S,$rRNA_23S,$rRNA_5S" >> {output.df}; done
 	
 	cp -avr {sample}/tmp/annotation/bakta {sample}/results/.
@@ -448,7 +448,7 @@ rule Taxonomy_MAGs:
         """
 	if [ ! -d "$(pwd)/{sample}/tmp/taxonomy" ]; then mkdir {sample}/tmp/taxonomy; fi
 	export GTDBTK_DATA_PATH="{db_gtdb}"
-	gtdbtk classify_wf --cpus {proc} --genome_dir {sample}/tmp/binning/bins --extension .fa --out_dir {sample}/tmp/taxonomy/gtdb --tmpdir {sample}/tmp/taxonomy 
+	gtdbtk classify_wf --cpus {proc} --genome_dir {sample}/tmp/binning/bins --extension .fa --out_dir {sample}/tmp/taxonomy/gtdb --tmpdir {sample}/tmp/taxonomy --skip_ani_screen
 	cp {sample}/tmp/taxonomy/gtdb/classify/gtdbtk.bac120.summary.tsv {output}
 	if [ -f "$(pwd)/{sample}/tmp/taxonomy/gtdb/classify/gtdbtk.ar53.summary.tsv" ]; then tail -n+2 {sample}/tmp/taxonomy/gtdb/classify/gtdbtk.ar53.summary.tsv >> {output}; fi
         """

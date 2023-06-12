@@ -1,4 +1,4 @@
-version: 1.0.1
+version: 1.0.2
 sample: mmlong2
 sing: none
 fastq: none
@@ -8,10 +8,13 @@ proc: 3
 flye_cov: 3
 flye_ovlp: 0
 minimap_ram: 50
+minimap_ref: 10
 min_contig_len: 3000
+max_contig_con: 18
+inc_contig_len: 120000
 min_mag_len: 250000
 medaka_split: 20
-medak_mod_pol: r1041_e82_400bps_sup_g615
+medak_mod_pol: r1041_e82_400bps_sup_v4.2.0
 semibin_mod: global
 semibin_prot: prodigal
 np_map_ident: 90
