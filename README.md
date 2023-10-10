@@ -26,8 +26,7 @@ chmod +x mmlong2/bin/mmlong2
 
 **Quick-start (AAU bioserver users):**
 ```
-module load Miniconda3/4.9.2-foss-2019a
-source activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
+conda activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
 mmlong2 -h
 ```
 <br/>
