@@ -15,11 +15,12 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 **Installation (Conda):**<br/>
 A local [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment containing all the required software dependencies can be created by using the code chunk posted below. To acquire microbial genome taxonomy and annotation results, databases will have to be [setup](msc/mmlong2-db.md).
 ```
-conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=7.26.0 singularity=3.8.6 zenodo_get=1.3.4 pv=1.6.6 pigz=2.6 tar=1.34 -y
-conda activate ./mmlong2 || source activate ./mmlong2 && zenodo_get -r 8027235 -o mmlong2/bin 
-pv mmlong2/bin/sing-mmlong2-lite-*.tar.gz | pigz -dc - | tar xf - -C mmlong2/bin/.
-pv mmlong2/bin/sing-mmlong2-proc-*.tar.gz | pigz -dc - | tar xf - -C mmlong2/bin/.
+mamba create --prefix mmlong2 -c conda-forge -c bioconda snakemake=8.2.3 singularity=3.8.6 zenodo_get pv pigz tar yq ncbi-amrfinderplus -y
+mamba activate ./mmlong2 || source activate ./mmlong2
+git clone https://github.com/Serka-M/mmlong2 mmlong2/repo
+cp -r mmlong2/repo/src/* mmlong2/bin
 chmod +x mmlong2/bin/mmlong2
+mmlong2 -h 
 ```
 
 <br/>
