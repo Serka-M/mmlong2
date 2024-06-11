@@ -1,0 +1,6 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - checkm-genome=1.2.2

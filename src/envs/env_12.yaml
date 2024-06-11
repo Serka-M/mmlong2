@@ -1,0 +1,10 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - gunc=1.0.6
+  - nanoq=0.10.0
+  - seqkit=2.8.2
+  - pandas=1.5.1
+  - cramino=0.14.5

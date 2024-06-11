@@ -1,0 +1,7 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - longshot=1.0.0
+  - samtools=1.20

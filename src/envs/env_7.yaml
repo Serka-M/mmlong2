@@ -1,0 +1,22 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - seqkit=2.8.2
+  - python=3.8.15
+  - scikit-learn=0.23.2
+  - h5py=2.10.0
+  - numpy=1.19.2
+  - diamond=2.0.4
+  - tensorflow=2.4.0
+  - lightgbm=3.2.1
+  - pandas=1.4.0
+  - scipy=1.8.0
+  - prodigal=2.6.3
+  - setuptools=65.6.3
+  - requests=2.28.1
+  - packaging=22.0
+  - tqdm=4.64.1
+  - pip:
+      - "git+https://github.com/chklovski/CheckM2@1.0.2#egg=CheckM2"

@@ -1,0 +1,12 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - flye=2.9.4
+  - minimap2=2.28
+  - samtools=1.20
+  - seqkit=2.8.2
+  - tiara=1.0.3
+  - metabat2=2.15
+  - das_tool=1.1.3 

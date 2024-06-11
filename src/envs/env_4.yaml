@@ -1,0 +1,7 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - semibin=2.1.0
+  - metamdbg=0.3

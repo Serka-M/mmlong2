@@ -1,0 +1,10 @@
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - minimap2=2.28
+  - samtools=1.20
+  - python=3.9
+  - pip:
+      - medaka==1.12.0
