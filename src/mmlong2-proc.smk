@@ -255,7 +255,7 @@ rule ExtraQC_aggregate:
         colnames(links) <- c("contig","bin")
         
         gunc=read.delim("{input.gunc}", sep="\t", header=T)
-        colnames(gunc) <- c("bin", "gunc_ccs", "gunc_rrs", "gunc_pass")
+        colnames(gunc) <- c("bin", "gunc_css", "gunc_rrs", "gunc_pass")
         
         variants <- merge(variants,links,by="contig",all=TRUE)
         variants[is.na(variants$var_n),]$var_n <- 0

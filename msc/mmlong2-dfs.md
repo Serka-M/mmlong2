@@ -1,6 +1,6 @@
 ## Description of mmlong2 custom dataframes
 
-### [output_name]_general.tsv
+### <output_name>_general.tsv
 
 | Category | Description |
 | --- | --- |
@@ -43,7 +43,7 @@
 
 <br/>
 
-### [output_name]_contigs.tsv
+### <output_name>_contigs.tsv
 
 | Category | Description |
 | --- | --- |
@@ -69,56 +69,53 @@
 
 <br/>
 
-### [output_name]_bins.tsv
+### <output_name>_bins.tsv
 
 | Category | Description |
 | --- | --- |
 | bin | Genome bin ID |
-| Completeness | Genome bin completeness estimate, reported by CheckM2 |
-| Contamination | Genome bin contamination estimate, reported by CheckM2 |
-| Completeness_Model_Used | Model used by CheckM2 |
-| Coding_Density | Genome bin gene coding density, reported by CheckM2 |
-| Contig_N50 | Genome bin N50 (bp), reported by CheckM2 |
-| Average_Gene_Length | Average gene length, reported by CheckM2 |
-| Genome_Size | Genome bin size (bp), reported by CheckM2 |
-| GC_Content | Genome bin guanine-cytosine content (fraction), reported by CheckM2 |
-| Total_Coding_Sequences | Number of coding sequences, reported by CheckM2 |
-| Total_Contigs | Number of contigs, reported by CheckM2 |
-| Max_Contig_Length | Length of the longest contig (bp), reported by CheckM2 |
-| N90 | Genome bin N90 (bp), reported by Quast |
-| [auN](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve, reported by Quast |
-| N_per_100kb | Rate of Ns in a genome bin per 100 kb, reported by Quast |
-| cov | Average genome bin coverage, reported by CoverM |
-| r_abund | Average genome bin relative abundance (%), reported by CoverM  |
-| bakta_CDS_all | Number of protein coding genes, reported by Bakta |
-| bakta_CDS_hyp | Number of hypothetical protein coding genes, reported by Bakta |
-| bakta_tRNA_all | Number of all tRNA genes genes, reported by Bakta |
-| bakta_tRNA_uniq | Number of unique tRNA genes genes, reported by Bakta  |
+| completeness_checkm1 | Genome bin completeness estimate, reported by CheckM |
+| contamination_checkm1 | Genome bin contamination estimate, reported by CheckM |
+| strain_heterogeneity_checkm1 | Genome bin strain heterogeneity index, reported by CheckM |
+| completeness_checkm2 | Genome bin completeness estimate, reported by CheckM2 |
+| contamination_checkm2 | Genome bin contamination estimate, reported by CheckM2 |
+| coding_density | Genome bin gene coding density, reported by CheckM2 |
+| genome_size | Genome bin size (bp), reported by CheckM2 |
+| contigs | Number of contigs, reported by CheckM2 |
+| gc |  Genome bin guanine-cytosine content (%), reported by Quast |
+| contig_n50 | Genome bin N50 (bp), reported by Quast |
+| contig_n90 | Genome bin N90 (bp), reported by Quast |
+| [aun](http://lh3.github.io/2020/04/08/a-new-metric-on-assembly-contiguity) | Nx area under the curve, reported by Quast |
+| n_per_100kb | Rate of Ns in a genome bin per 100 kb, reported by Quast |
+| cov | Genome bin coverage, reported by CoverM |
+| r_abund | Genome bin relative abundance (%), reported by CoverM  |
+| bakta_cds_all | Number of protein coding genes, reported by Bakta |
+| bakta_cds_hyp | Number of hypothetical protein coding genes, reported by Bakta |
+| bakta_trna_all | Number of all tRNA genes genes, reported by Bakta |
+| bakta_trna_uniq | Number of unique tRNA genes genes, reported by Bakta  |
 | bakta_16S | Number of 16S rRNA genes genes, reported by Bakta |
 | bakta_23S | Number of 23S rRNA genes genes, reported by Bakta |
 | bakta_5S | Number of 5S rRNA genes genes, reported by Bakta |
 | barrnap_16S | Number of 16S rRNA genes genes, reported by Barrnap |
 | barrnap_23S | Number of 23S rRNA genes genes, reported by Barrnap |
 | barrnap_5S | Number of 5S rRNA genes genes, reported by Barrnap |
-| MAG_status | Genome bin quality ranking according to [MIMAG standards](https://www.nature.com/articles/nbt.3893) |
-| cMAG_status | MAG circularity status |
-| gunc_contamination | Fraction of single-copy-genes from other clades, reported by GUNC |
-| gunc_status | Chimeric MAG status, reported by GUNC |
-| tax_gtdb| MAG taxonomy, reported by GTDB-tk |
-| fastani_ani | Average nucleotide identity for a close match, reported by GTDB-tk |
-| fastani_af | Alignment fraction for close match, reported by GTDB-tk |
-| closest_placement_reference | ID for reference genome matched, reported by GTDB-tk |
-| closest_placement_ani | Top ANI match thats is < 95 %, reported by GTDB-tk  |
-| closest_placement_af | Alignment fraction for matches with < 95 % ANI, reported by GTDB-tk  |
-| msa_percent | Percentage of amino acids in the multi-sequence alignment, reported by GTDB-tk |
-| red_value | Relative Evolutionary Divergence for a distant match, reported by GTDB-tk |
-| gtdb_warning | Warning message, reported by GTB-tk |
-| tax_silva | MAG taxonomy, based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
-| tophit_silva | Percent identity for best match to the reference sequence, reported by vsearch |
-| tax_midas | MAG taxonomy, based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
-| tophit_midas | Percent identity for best match to the reference sequence, reported by vsearch |
-| var_n | Number of detected variants in the MAG |
-| var_perc | Fraction of MAG length as variants |
+| custom_trna_uniq | Number of unique tRNA genes genes, reported by tRNAscan-SE |
+| bin_status | Genome bin quality ranking according to [MIMAG standards](https://www.nature.com/articles/nbt.3893) |
+| cbin_status | Genome bin circularity status |
+| gunc_css | Clade separation [score](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-021-02393-0), reported by GUNC |
+| gunc_rrs | Reference representation [score](https://grp-bork.embl-community.io/gunc/output.html#output-columns), reported by GUNC |
+| gunc_pass | Chimerism test status, reported by GUNC |
+| var_n | Number of detected nucleotide variants, reported by Longshot |
+| var_perc | Percentage of genome bin with nucleotide variants |
+| tax_gtdb| Genome bin taxonomy, reported by GTDB-tk |
+| ref_gtdb | Reference for the closest genome bin match, reported by GTDB-tk |
+| ani_gtdb | Average nucleotide identity for the closest match, reported by GTDB-tk |
+| af_gtdb | Alignment fraction for the closest match, reported by GTDB-tk |
+| msa_gtdb | Percentage of the multi-sequence alignment spanned by the genome bin, reported by GTDB-tk |
+| red_gtdb | Genome bin relative evolutionary divergence, reported by GTDB-tk |
+| warning_gtdb | Warning message, reported by GTDB-tk |
+| tax_rrna | Genome bin taxonomy, based on 16S rRNA classification to a rRNA database |
+| tophit_rrna | Percent identity for the best match to a reference sequence in a rRNA database, reported by Vsearch |
 | wf_name | Workflow output name |
 | wf_mode | Workflow mode |
 | wf_v | Workflow version |
