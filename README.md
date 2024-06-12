@@ -54,20 +54,20 @@ If some of the databases are already installed, they can also be used by the wor
 
 ## Running mmlong2
 
-**Quick-start (AAU bioserver users):**
+##Quick-start (AAU bioserver users)
 ```
 conda activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
 mmlong2 -h
 ```
 <br/>
 
-**Usage example for Nanopore-only mode:**
+##Usage example for Nanopore-only mode
 ```
 mmlong2 -np [Nanopore_reads.fastq] -p [Processes/Threads] -o [Output_dir]
 ```
 <br/>
 
-**Full usage:**
+##Full usage
 ```
 MAIN INPUTS:
 -np     --nanopore_reads        Path to Nanopore reads (default: none)
@@ -102,7 +102,7 @@ MISCELLANEOUS INPUTS:
 ```
 <br/>
 
-**Overview of result files:**
+##Overview of result files
 * `assembly.fasta` - assembled and polished metagenome
 * `rRNA.fa` - rRNA sequences, recovered from the polished metagenome
 * `rRNA_16S.fa` - 16S rRNA sequences, recovered from the polished metagenome
@@ -114,13 +114,13 @@ MISCELLANEOUS INPUTS:
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
 <br/>
 
-**Additional documentation:**
+##Additional documentation
 * [Dataframe description](msc/mmlong2-dfs.md)
 * [Dependency list](msc/mmlong2-dep.md)
 * [Database setup](msc/mmlong2-db.md)
 <br/>
 
-**Comments:**
+##Comments
 * The workflow assumes that the input reads have been quality-filtered and adapter/barcode sequences have been trimmed off.
 * The workflow is long-read-based and requires either Nanopore or PacBio HiFi reads. It doesn't feature an Illumina-only mode.
 * If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
@@ -128,6 +128,6 @@ MISCELLANEOUS INPUTS:
 * Multiple large-scale databases are utilized by mmlong2 for genome bin analysis. If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
 <br/>
 
-**Future improvements**<br/>
+###Future improvements
 Suggestions on improving the workflow or fixing bugs are always welcome.<br/>
 Please use the GitHub `Issues` section or e-mail to mase@bio.aau.dk for providing feedback.
