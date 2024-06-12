@@ -4,7 +4,7 @@ Various databases are used by the mmlong2 workflow to characterize the recovered
 Since there are multiple ways of setting up databases, code examples on how to download the relevant databases are presented below.
 <br/>
 
-The downloaded databases can be used with mmlong2 by using the database settings of the wrapper script (e.g. `mmlong2 --database_gtdb /path/to/gtdb/database`) or by modifying the `mmlong2-proc-config.yaml` file to have the databases used by default.
+The downloaded databases can be provided to mmlong2 by using the database settings of the wrapper script (e.g. `mmlong2 --database_gtdb /path/to/gtdb/database`) or by modifying the `mmlong2-proc-config.yaml` file to use the databases by default.
 <br/>
 
 #### MiDAS (Microbial Database for Activated Sludge) for 16S rRNA taxonomy
@@ -39,7 +39,7 @@ tar -xvzf gtdbtk_r220_data.tar.gz
 
 #### Bakta databases for microbial genome annotation (requires [AMRFinderPlus](https://github.com/ncbi/amr/wiki))
 ```
-wget https://zenodo.org/record/7669534/files/db.tar.gz
+wget https://zenodo.org/records/10522951/files/db.tar.gz
 tar -xvzf db.tar.gz
 amrfinder_update --database db/amrfinderplus-db
 ```
