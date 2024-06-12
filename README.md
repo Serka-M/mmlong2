@@ -4,16 +4,34 @@
 
 Automated long-read metagenomics workflow, using either PacBio HiFi or Nanopore sequencing reads as input to generate characterized MAGs.
 The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst/mmlong).
-
-**Note:** multiple large-scale databases are utilized by mmlong2 for genome bin analysis. If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
-<br/>
 <br/>
 
-**Overview of mmlong2 workflow in Nanopore-only mode:**
+## Workflow description
+### Core features
+* [Snakemake](https://snakemake.readthedocs.io) workflow running dependencies from a [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container for enhanced reproducibility
+* Bioinformatics tool and parameter optimizations for high complexity metagenomics samples
+* Circular prokaryotic genome extraction as separate genome bins
+* Eukaryotic contig removal for reduced prokaryotic genome contamination
+* Differential coverage support for improved prokaryotic genome recovery
+* Iterative ensemble binning strategy for improved prokaryotic genome recovery
+* Genome quality classification according to [MIMAG guidelines](https://www.nature.com/articles/nbt.3893)
+* Expanded prokaryotic genome quality assessment, including microdiversity approximation and chimerism checks
+* Taxonomic classification at prokaryotic genome, contig and 16S rRNA levels
+* Generation of analysis-ready dataframes
+
+### Schematic overview
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
+<br/>
 
-**Installation (Conda):**<br/>
-A local [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment containing all the required software dependencies can be created by using the code chunk posted below. To acquire microbial genome taxonomy and annotation results, databases will have to be [setup](msc/mmlong2-db.md).
+## Installation (Bioconda)
+### Bioconda
+The recommended way of installing mmlong2 is by setting up a [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment through [Bioconda](https://bioconda.github.io/):
+```
+mamba install -c bioconda mmlong2
+```
+
+### From source (Conda) 
+A Conda environment with the latest workflow code can also be created by using the following code:
 ```
 mamba create --prefix mmlong2 -c conda-forge -c bioconda snakemake=8.2.3 singularity=3.8.6 zenodo_get pv pigz tar yq ncbi-amrfinderplus -y
 mamba activate ./mmlong2 || source activate ./mmlong2
@@ -23,6 +41,15 @@ chmod +x mmlong2/bin/mmlong2
 mmlong2 -h 
 ```
 
+### Databases and bioinformatics software
+Bioinformatics tools and other software dependencies will be automatically installed when running the workflow for the first time.
+By default, a pre-built [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container will be downloaded and set up, although pre-defined Conda environments can also be used by running the workflow with the '--conda_envs_only' setting.
+<br/>
+To acquire prokaryotic genome taxonomy and annotation results, databases are necessary and can be automatically installed by running the following command:
+```
+mmlong2 --install_databases
+```
+If some of the databases are already installed, they can also be used by the workflow without a new download (e.g. '--database_gtdb' option). Alternatively, a guide for [manual](msc/mmlong2-db.md) database installation is also provided.
 <br/>
 
 **Quick-start (AAU bioserver users):**
@@ -96,6 +123,7 @@ MISCELLANEOUS INPUTS:
 * The workflow is long-read-based and requires either Nanopore or PacBio HiFi reads. It doesn't feature an Illumina-only mode.
 * If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
 * It is recommended to run the workflow from a screen session. This can be achieved with e.g. `screen -R mmlong2` and then running the workflow.
+* Multiple large-scale databases are utilized by mmlong2 for genome bin analysis. If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
 <br/>
 
 **Future improvements**<br/>
