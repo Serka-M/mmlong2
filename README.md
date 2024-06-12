@@ -17,7 +17,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 * Genome quality classification according to [MIMAG guidelines](https://www.nature.com/articles/nbt.3893)
 * Expanded prokaryotic genome quality assessment, including microdiversity approximation and chimerism checks
 * Taxonomic classification at prokaryotic genome, contig and 16S rRNA levels
-* Generation of analysis-ready [dataframes](msc/mmlong2-dfs.md)
+* Generation of analysis-ready [dataframes](msc/mmlong2-dfs.md) at genome bin and contig levels
 
 ### Schematic overview
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
