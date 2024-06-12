@@ -6,14 +6,14 @@
 * It also recommended that the input for mmlong2 is at least 1 GB of sequenced data with multiple prokaryotic organisms.
 
 #### Is any data pre-processing required for running mmlong2?
-* It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi as well as short-reads) and adaptor, barcode trimming before performing read assembly with mmmlong2.
+* It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi as well as short-reads) and adaptor, barcode trimming before performing read assembly with mmlong2.
 
 #### I want to test mmlong2 with my samples, but I don't want to install over 100 Gb of databases
 * If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline with identical MAG recovery procedure and does not require large database installation.
 
 #### What to do when the mmlong2 workflow crashes?
 * If the workflow crashes, it can usually be resumed by re-running the workflow with the exact same code. 
-* If you want to resume the workflow from a new installation of mmlong2, it is highly recommended to first run the workflow with the ´--touch´ option to mark completed files against deletion.
+* If you want to resume the workflow from a new installation of mmlong2, it is highly recommended to first run the workflow with the `--touch` option to mark completed files against deletion.
 
 #### What about eukaryotic or viral genomes?
 * At the moment, mmlong2 is not designed to perform genome recovery of viruses or eukaryotes. 
