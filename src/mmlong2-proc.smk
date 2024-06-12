@@ -107,6 +107,7 @@ rule Finalise:
         gen <- read.delim("{input.gen_stats}", sep="\t", header=T)
         
         # Combine data
+        contigs <- merge(contigs,contigs_stats,by="contig", all=TRUE)
         contigs <- merge(contigs,contigs_qc,by="contig", all=TRUE)
         contigs[is.na(contigs$var_n),]$var_n <- 0
         contigs$var_perc <- round(contigs$var_n/contigs$len_bp*100,3)

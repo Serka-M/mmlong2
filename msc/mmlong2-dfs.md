@@ -47,21 +47,17 @@
 
 | Category | Description |
 | --- | --- |
-| contig | Contig ID |
+| contig | Contig identifier |
 | len_bp | Contig length |
-| cov | Contig coverage by long reads |
-| status_circular | Contig circularity status, reported by Flye |
-| status_repeat | Contig repeat structure status, reported by Flye |
-| graph_path | Links between contigs and edges of the assembly graph, reported by Flye |
+| cov | Contig coverage, reported by the assembler |
+| status_circular | Contig circularity status, reported by the assembler |
 | tax_kaiju | Contig taxonomy, reported by Kaiju |
-| tax_silva | Contig taxonomy, based on 16S rRNA classification to [Silva](https://www.arb-silva.de/) database |
-| tophit_silva | Percent identity for best match to the reference sequence, reported by vsearch |
-| tax_midas | Contig taxonomy, based on  16S rRNA classification to [MiDAS](https://www.midasfieldguide.org/guide) database |
-| tophit_midas | Percent identity for best match to the reference sequence, reported by vsearch |
-| bin | ID for genome bin that contains the contig |
-| GC | Contig guanine-cytosine percent content |
-| var_n | Number of detected variants in the contig |
-| var_perc | Fraction of contig length as variants |
+| tax_rrna | Contig taxonomy, based on 16S rRNA classification to a rRNA database |
+| tophit_rrna | Percent identity for the best match in a rRNA database, reported by Vsearch |
+| bin | Identifier for genome bin that contains the contig |
+| gc | Contig guanine-cytosine content (%) |
+| var_n | Number of detected nucleotide variants, reported by Longshot |
+| var_perc | Percentage of contig with nucleotide variants |
 | wf_name | Workflow output name |
 | wf_mode | Workflow mode |
 | wf_v | Workflow version |
@@ -73,7 +69,7 @@
 
 | Category | Description |
 | --- | --- |
-| bin | Genome bin ID |
+| bin | Genome bin identifier |
 | completeness_checkm1 | Genome bin completeness estimate, reported by CheckM |
 | contamination_checkm1 | Genome bin contamination estimate, reported by CheckM |
 | strain_heterogeneity_checkm1 | Genome bin strain heterogeneity index, reported by CheckM |
