@@ -53,7 +53,6 @@ If some of the databases are already installed, they can also be used by the wor
 <br/><br/>
 
 ## Running mmlong2
-
 ### Quick-start (AAU bioserver users)
 ```
 conda activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
@@ -109,6 +108,7 @@ MISCELLANEOUS INPUTS:
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
+<br/>
 
 ## Additional documentation
 * [Dataframe description](msc/mmlong2-dfs.md)
@@ -121,6 +121,7 @@ MISCELLANEOUS INPUTS:
 * If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
 * It is recommended to run the workflow from a screen session. This can be achieved with e.g. `screen -R mmlong2` and then running the workflow.
 * Multiple large-scale databases are utilized by mmlong2 for genome bin analysis. If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
+<br/>
 
 ## Future improvements
 Suggestions on improving the workflow or fixing bugs are always welcome.<br/>
