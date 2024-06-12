@@ -113,9 +113,9 @@ The prepared dataframe can be provided to the workflow through the `-cov` option
 ### Overview of results
 * `<output_name>_assembly.fasta` - assembled and polished metagenome
 * `<output_name>_16S.fa` - 16S rRNA sequences, recovered from the polished metagenome
-* `<output_name>_bins.tsv` - per-bin results [dataframe]()
-* `<output_name>_contigs.tsv` - per-contig results [dataframe]()
-* `<output_name>_general.tsv` - workflow result summary as a single row [dataframe]()
+* `<output_name>_bins.tsv` - per-bin results [dataframe](msc/mmlong2-dep.md#output_name_binstsv)
+* `<output_name>_contigs.tsv` - per-contig results [dataframe](msc/mmlong2-dep.md#output_name_contigstsv)
+* `<output_name>_general.tsv` - workflow result summary as a single row [dataframe](msc/mmlong2-dep.md#output_name_generaltsv)
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
@@ -137,3 +137,5 @@ The prepared dataframe can be provided to the workflow through the `-cov` option
 ## Future improvements
 Suggestions on improving the workflow or fixing bugs are always welcome.<br/>
 Please use the GitHub `Issues` section or e-mail to mase@bio.aau.dk for providing feedback.
+
+[//]: # (Written by Mantas Sereika)
