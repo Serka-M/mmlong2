@@ -21,7 +21,6 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 
 ### Schematic overview
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
-<br/>
 
 ## Installation
 ### Bioconda
@@ -119,20 +118,12 @@ The prepared dataframe can be provided to the workflow through the `-cov` option
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
-<br/>
 
 ## Additional documentation
-* [Dataframe descriptions](msc/mmlong2-dfs.md)
+* [Frequently asked questions](msc/mmlong2-faq.md)
+* [Result dataframe documentation](msc/mmlong2-dfs.md)
 * [Dependency list](msc/mmlong2-dep.md)
-* [Database setup](msc/mmlong2-db.md)
-
-*Comments:*
-* The workflow assumes that the input reads have been quality-filtered and adapter/barcode sequences have been trimmed off.
-* The workflow is long-read-based and requires either Nanopore or PacBio HiFi reads. It doesn't feature an Illumina-only mode.
-* If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
-* It is recommended to run the workflow from a screen session. This can be achieved with e.g. `screen -R mmlong2` and then running the workflow.
-* Multiple large-scale databases are utilized by mmlong2 for genome bin analysis. If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite).
-<br/>
+* [Manual database setup](msc/mmlong2-db.md)
 
 ## Future improvements
 Suggestions on improving the workflow or fixing bugs are always welcome.<br/>
