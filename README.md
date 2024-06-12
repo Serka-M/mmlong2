@@ -53,58 +53,69 @@ If some of the databases are already installed, they can also be used by the wor
 <br/><br/>
 
 ## Running mmlong2
-### Quick-start (AAU bioserver users)
+### Usage example
 ```
-conda activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
-mmlong2 -h
-```
-
-### Usage example for Nanopore-only mode
-```
-mmlong2 -np [Nanopore_reads.fastq] -p [Processes/Threads] -o [Output_dir]
+mmlong2-lite -np nanopore_reads.fastq.gz -o output_dir -p 100
 ```
 
 ### Full usage
 ```
 MAIN INPUTS:
--np     --nanopore_reads        Path to Nanopore reads (default: none)
--pb     --pacbio_reads          Path to PacBio HiFi reads (default: none)
+-np     --nanopore_reads        Path to Nanopore reads
+-pb     --pacbio_reads          Path to PacBio HiFi reads
 -o      --output_dir            Output directory name (default: mmlong2)
 -p      --processes             Number of processes/multi-threading (default: 3)
--cov    --coverage              CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
--run    --run_until             Run pipeline until a specified stage completes 
-				(e.g. assembly polishing binning taxonomy annotation variants)
 
-ADDITIONAL INPUTS:
--tmp    --temporary_dir         Directory for temporary files (default: none)
--med1   --medaka_model_polish   Medaka polishing model (default: r1041_e82_400bps_sup_v4.2.0)
--med2	--medaka_model_variant	Medaka variant calling model (default: r1041_e82_400bps_sup_variant_v4.2.0)
+OPTIONAL SETTINGS:
+-db     --install_databases     Install missing databases used by the workflow
+-dbd    --database_dir          Output directory for database installation (default: current working directory)
+-cov    --coverage              CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
+-run    --run_until             Run pipeline until a specified stage completes (e.g.  assembly polishing filtering singletons coverage binning taxonomy annotation extraqc stats)
+-tmp    --temporary_dir         Directory for temporary files (default: current working directory)
+-dbg    --use_metamdbg          Use metaMDBG for assembly of PacBio reads (default: use metaFlye)
+-med    --medaka_model          Medaka polishing model (default: r1041_e82_400bps_sup_v5.0.0)
+-mo     --medaka_off            Do not run Medaka polishing with Nanopore assemblies (default: use Medaka)
+-vmb    --use_vamb              Use VAMB for binning (default: use GraphMB)
 -sem    --semibin_model         Binning model for SemiBin (default: global)
--fmo    --flye_min_ovlp         Minimum overlap between reads used by Flye assembler (default: auto)
--fmc    --flye_min_cov          Minimum initial contig coverage used by Flye assembler (default: 3)
 -mlc    --min_len_contig        Minimum assembly contig length (default: 3000)
 -mlb    --min_len_bin           Minimum genomic bin size (default: 250000)
--slv    --silva                 Silva database to use (default: none)
--mds    --midas                 Midas database to use (default: none)
--gnc    --gunc                  Gunc database to use (default: none)
--bkt    --bakta                 Bakta database to use (default: none)
--kj     --kaiju                 Kaiju database to use (default: none)
--gdb    --gtdb                  GTDB-tk database to use (default: none)
--x1     --extra_inputs1         Extra inputs for the MAG production part of the Snakemake workflow (default: none)
--x2     --extra_inputs2         Extra inputs for the MAG processing part of the Snakemake workflow (default: none)
-
-MISCELLANEOUS INPUTS:
+-rna    --database_rrna         16S rRNA database to use
+-gunc   --database_gunc         Gunc database to use
+-bkt    --database_bakta        Bakta database to use
+-kj     --database_kaiju        Kaiju database to use
+-gtdb   --database_gtdb         GTDB-tk database to use
 -h      --help                  Print help information
 -v      --version               Print workflow version number
+
+ADVANCED SETTINGS:
+-fmo    --flye_min_ovlp         Minimum overlap between reads used by Flye assembler (default: auto)
+-fmc    --flye_min_cov          Minimum initial contig coverage used by Flye assembler (default: 3)
+-env    --conda_envs_only       Use conda environments instead of container (default: use container)
+-n      --dryrun                Print summary of jobs for the Snakemake workflow
+-t      --touch                 Touch Snakemake output files
+-r1     --rule1                 Run specified Snakemake rule for the MAG production part of the workflow
+-r2     --rule2                 Run specified Snakemake rule for the MAG processing part of the workflow
+-x1     --extra_inputs1         Extra inputs for the MAG production part of the Snakemake workflow
+-x2     --extra_inputs2         Extra inputs for the MAG processing part of the Snakemake workflow
+-xb     --extra_inputs_bakta    Extra inputs (comma-separated) for MAG annotation using Bakta
 ```
 
-### Overview of result files
-* `assembly.fasta` - assembled and polished metagenome
-* `rRNA.fa` - rRNA sequences, recovered from the polished metagenome
-* `rRNA_16S.fa` - 16S rRNA sequences, recovered from the polished metagenome
-* `<name>_contigs.tsv` - dataframe for metagenome contig metrics
-* `<name>_bins.tsv` - dataframe for automated binning results
-* `<name>_general.tsv` - workflow results, summarized into a single row
+### Using differential coverage binning
+To perform genome recovery with differential coverage, prepare a 2-column comma-separated dataframe, indicating the additional read datatype (`NP` for Nanopore, `PB` for PacBio, `IL` for short reads) and read file location.<br/>
+Dataframe example:
+```
+PB,/path/to/your/reads/file1.fastq
+NP,/path/to/your/reads/file2.fastq
+IL,/path/to/your/reads/file3.fastq.gz
+```
+The prepared dataframe can be provided to the workflow through the `-cov` option.
+
+### Overview of results
+* `<output_name>_assembly.fasta` - assembled and polished metagenome
+* `<output_name>_16S.fa` - 16S rRNA sequences, recovered from the polished metagenome
+* `<output_name>_bins.tsv` - per-bin results [dataframe]()
+* `<output_name>_contigs.tsv` - per-contig results [dataframe]()
+* `<output_name>_general.tsv` - workflow result summary as a single row [dataframe]()
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)

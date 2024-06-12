@@ -82,7 +82,6 @@ OPTIONAL SETTINGS:
 -db 	--install_databases	Install missing databases used by the workflow
 -dbd 	--database_dir		Output directory for database installation (default: $(pwd))
 -cov 	--coverage		CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
--cov 	--coverage		CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
 -run	--run_until		Run pipeline until a specified stage completes (e.g. ${stages[*]/$stage})
 -tmp	--temporary_dir		Directory for temporary files (default: none)
 -dbg	--use_metamdbg		Use metaMDBG for assembly of PacBio reads (default: use metaFlye)
