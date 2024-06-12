@@ -115,7 +115,7 @@
 | red_gtdb | Genome bin relative evolutionary divergence, reported by GTDB-tk |
 | warning_gtdb | Warning message, reported by GTDB-tk |
 | tax_rrna | Genome bin taxonomy, based on 16S rRNA classification to a rRNA database |
-| tophit_rrna | Percent identity for the best match to a reference sequence in a rRNA database, reported by Vsearch |
+| tophit_rrna | Percent identity for the best match in a rRNA database, reported by Vsearch |
 | wf_name | Workflow output name |
 | wf_mode | Workflow mode |
 | wf_v | Workflow version |
