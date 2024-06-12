@@ -31,7 +31,7 @@ mamba install -c bioconda mmlong2
 ```
 
 ### From source (Conda) 
-A Conda environment with the latest workflow code can also be created by using the following code:
+A local Conda environment with the latest workflow code can also be created by using the following code:
 ```
 mamba create --prefix mmlong2 -c conda-forge -c bioconda snakemake=8.2.3 singularity=3.8.6 zenodo_get pv pigz tar yq ncbi-amrfinderplus -y
 mamba activate ./mmlong2 || source activate ./mmlong2
@@ -43,14 +43,16 @@ mmlong2 -h
 
 ### Databases and bioinformatics software
 Bioinformatics tools and other software dependencies will be automatically installed when running the workflow for the first time.
-By default, a pre-built [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container will be downloaded and set up, although pre-defined Conda environments can also be used by running the workflow with the '--conda_envs_only' setting.
-<br/>
+By default, a pre-built [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container will be downloaded and set up, although pre-defined Conda environments can also be used by running the workflow with the `--conda_envs_only` setting.
+<br/><br/>
 To acquire prokaryotic genome taxonomy and annotation results, databases are necessary and can be automatically installed by running the following command:
 ```
 mmlong2 --install_databases
 ```
-If some of the databases are already installed, they can also be used by the workflow without a new download (e.g. '--database_gtdb' option). Alternatively, a guide for [manual](msc/mmlong2-db.md) database installation is also provided.
+If some of the databases are already installed, they can also be used by the workflow without a new download (e.g. `--database_gtdb` option). Alternatively, a guide for [manual](msc/mmlong2-db.md) database installation is also provided.
 <br/>
+
+## Usage
 
 **Quick-start (AAU bioserver users):**
 ```
