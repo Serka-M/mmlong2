@@ -5,37 +5,34 @@
 | Category | Description |
 | --- | --- |
 | reads_n | Number of reads, reported by Nanoq |
-| reads_size_bp | Read yield, reported by Nanoq |
-| reads_N50_bp | Read N50, reported by Nanoq |
+| reads_yield_bp | Read yield, reported by Nanoq |
+| reads_n50_bp | Read length N50 value, reported by Nanoq |
 | reads_len_max_bp | Length of the longest read, reported by Nanoq |
 | reads_len_min_bp | Length of the shortest read, reported by Nanoq |
 | reads_mean_len_bp | Mean read length, reported by Nanoq |
 | reads_median_len_bp | Median read length, reported by Nanoq |
 | reads_mean_q | Mean read Phred quality score, reported by Nanoq |
 | reads_median_q | Median read Phred quality score, reported by Nanoq |
-| assembly_size_bp | Metagenome assembly size, reported by Flye |
-| assembly_contigs_n | Number of contigs, reported by Flye |
-| assembly_contigs_N50_bp | Contig N50, reported by Flye |
-| assembly_contigs_meanCOV | Mean contig coverage, reported by Flye |
-| assembly_reads_mapped | Fraction of read data that maps to the assembly, reported by Flye |
-| contigs_circ | Number of circular contigs |
-| all_mags | Total number of genome bins |
-| circ_mags | Number of circular genome bins |
-| hq_mags | Number of high-quality genome bins |
-| mq_mags | Number of medium-quality genome bins |
-| lq_mags | Number of low-quality genome bins |
-| contaminated_mags | Number of contaminated genome bins |
-| asm_binned | Percent of assembly size that was binned |
-| r_abund_bins | Percent of read relative abundance explained by the bins |
-| mag_cov_med_hq_mq | Median coverage of high-quality and medium-quality bins |
-| mag_cov_med_hq | Median coverage of high-quality bins |
-| mag_cov_med_mq | Median coverage of medium-quality binss |
-| mag_cov_mad_hq_mq | Median absolute deviation in coverage of high-quality and medium-quality bins |
-| mag_cov_mad_hq | Median absolute deviation in coverage of high-quality bins |
-| mag_cov_mad_mq | Median absolute deviation in coverage of medium-quality binss |
-| contigs_med_hq_mq | Median no. of contigs in high-quality and medium-quality bins |
-| contigs_med_hq | Median no. of contigs in high-quality bins |
-| contigs_med_mq | Median no. of contigs in medium-quality binss |
+| contigs_n | Number of assembled contigs, reported by Nanoq |
+| contigs_yield_bp |  Metagenome assembly size, reported by Nanoq |
+| contigs_n50_bp | Contig length N50 value, reported by Nanoq |
+| contigs_len_max_bp | Length of the longest contig, reported by Nanoq |
+| contigs_len_min_bp | Length of the shortest contig, reported by Nanoq |
+| contigs_mean_len_bp | Mean contig length, reported by Nanoq |
+| contigs_median_len_bp | Median contig length, reported by Nanoq |
+| mapped_identity_median | Mean read identity (%) to the assembled metagenome, reported by Cramino |
+| mapped_identity_mean | Median read identity (%) to the assembled metagenome, reported by Cramino |
+| contigs_circ | Number of circular contigs, reported by the assembler |
+| all_bins | Total number of genome bins |
+| circ_bins | Number of circular genome bins |
+| hq_bins | Number of high-quality genome bins |
+| mq_bins | Number of medium-quality genome bins |
+| lq_bins | Number of low-quality genome bins |
+| contaminated_bins | Number of contaminated genome bins |
+| bin_cov_median | Median genome bin coverage |
+| yield_assembled | Percentage of sequenced data assembled into contigs |
+| yield_binned | Percentage of sequenced data that was binned |
+| assembly_binned | Percent of assembly size that was binned |
 | wf_name | Workflow output name |
 | wf_mode | Workflow mode |
 | wf_v | Workflow version |
