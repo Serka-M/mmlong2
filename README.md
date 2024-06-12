@@ -59,13 +59,11 @@ If some of the databases are already installed, they can also be used by the wor
 conda activate /projects/microflora_danica/mmlong2/conda/mmlong2-v0.9.2
 mmlong2 -h
 ```
-<br/>
 
 ### Usage example for Nanopore-only mode
 ```
 mmlong2 -np [Nanopore_reads.fastq] -p [Processes/Threads] -o [Output_dir]
 ```
-<br/>
 
 ### Full usage
 ```
@@ -100,7 +98,6 @@ MISCELLANEOUS INPUTS:
 -h      --help                  Print help information
 -v      --version               Print workflow version number
 ```
-<br/>
 
 ### Overview of result files
 * `assembly.fasta` - assembled and polished metagenome
@@ -112,13 +109,11 @@ MISCELLANEOUS INPUTS:
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
-<br/>
 
 ### Additional documentation
 * [Dataframe description](msc/mmlong2-dfs.md)
 * [Dependency list](msc/mmlong2-dep.md)
 * [Database setup](msc/mmlong2-db.md)
-<br/>
 
 ### Comments
 * The workflow assumes that the input reads have been quality-filtered and adapter/barcode sequences have been trimmed off.
