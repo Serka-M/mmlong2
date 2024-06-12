@@ -109,13 +109,14 @@ MISCELLANEOUS INPUTS:
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
+<br/>
 
-### Additional documentation
+## Additional documentation
 * [Dataframe description](msc/mmlong2-dfs.md)
 * [Dependency list](msc/mmlong2-dep.md)
 * [Database setup](msc/mmlong2-db.md)
 
-### Comments
+*Comments:*
 * The workflow assumes that the input reads have been quality-filtered and adapter/barcode sequences have been trimmed off.
 * The workflow is long-read-based and requires either Nanopore or PacBio HiFi reads. It doesn't feature an Illumina-only mode.
 * If the workflow crashes, it can be resumed by re-running the same command. Some of the intermediary files might have to be removed for compatibility.
