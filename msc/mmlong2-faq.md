@@ -6,7 +6,7 @@
 * It also recommended that the input for mmlong2 is at least 1 GB of sequenced data with multiple prokaryotic organisms.
 
 #### Is read data pre-processing required by the workflow?
-* It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi as well as short-reads) and trim of read adaptor, barcode sequences before running mmlong2.
+* It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi as well as short-reads) and trim off read adaptor, barcode sequences before running mmlong2.
 
 #### Is there a way to test mmlong2 without installing over 100 Gb of databases?
 * If you are only interested in getting the MAGs, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline with an identical MAG recovery procedure and does not require large database installation.
