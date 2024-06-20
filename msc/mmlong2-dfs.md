@@ -1,4 +1,4 @@
-## Description of mmlong2 custom dataframes
+## Description of mmlong2 result dataframes
 
 ### <output_name>_general.tsv
 
