@@ -9,15 +9,15 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 ## Workflow description
 ### Core features
 * [Snakemake](https://snakemake.readthedocs.io) workflow running dependencies from a [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container for enhanced reproducibility
-* Bioinformatics tool and parameter optimizations for high complexity metagenomics samples
+* Bioinformatics tool and parameter optimizations for processing high complexity metagenomic samples
 * Circular prokaryotic genome extraction as separate genome bins
 * Eukaryotic contig removal for reduced prokaryotic genome contamination
 * Differential coverage support for improved prokaryotic genome recovery
 * Iterative ensemble binning strategy for improved prokaryotic genome recovery
-* Genome quality classification according to [MIMAG guidelines](https://www.nature.com/articles/nbt.3893)
-* Expanded prokaryotic genome quality assessment, including microdiversity approximation and chimerism checks
-* Taxonomic classification at prokaryotic genome, contig and 16S rRNA levels
-* Generation of analysis-ready [dataframes](msc/mmlong2-dfs.md) at genome bin and contig levels
+* Recovered genome quality classification according to [MIMAG guidelines](https://www.nature.com/articles/nbt.3893)
+* Supplemental prokaryotic genome quality assessment, including microdiversity approximation and chimerism checks
+* Automated taxonomic classification at genome, contig and 16S rRNA levels
+* Generation of analysis-ready [dataframes](msc/mmlong2-dfs.md) at genome and contig levels
 
 ### Schematic overview
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
