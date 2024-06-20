@@ -53,7 +53,7 @@ If some of the databases are already installed, they can also be re-used by the 
 
 ## Running mmlong2
 ### Usage examples
-For trying out the mmlong2 workflow, small test datasets can be downloaded from [Zenodo](https://zenodo.org/):
+For trying out the mmlong2 workflow, small test datasets can be downloaded from [Zenodo](https://zenodo.org/records/12168493):
 ```
 zenodo_get -r 12168493
 ```
@@ -63,7 +63,7 @@ Once downloaded, to test the workflow in Nanopore mode up until the genome binni
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 100 -run binning
 ```
 
-To test the workflow in PacBio HiFi using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis:
+To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis:
 ```
 mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 100 -dbg
 ```
