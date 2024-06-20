@@ -117,7 +117,7 @@ The prepared dataframe can be provided to the workflow through the `-cov` option
 * `<output_name>_general.tsv` - workflow result summary as a single row [dataframe](msc/mmlong2-dfs.md#output_name_generaltsv)
 * `dependencies.csv`- list of dependencies used and their versions
 * `bins` - directory for metagenome assembled genomes
-* `bakta` - directory, containing bin annotation results from [bakta](https://github.com/oschwengers/bakta)
+* `bakta` - directory, containing genome annotation results from [bakta](https://github.com/oschwengers/bakta)
 
 ## Additional documentation
 * [Frequently asked questions](msc/mmlong2-faq.md)
