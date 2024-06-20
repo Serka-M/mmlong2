@@ -5,7 +5,7 @@
 * Please keep in mind that mmlong2 is a long-reads-only workflow, designed to work with Nanopore (about 1 % read error rate) or with PacBio HiFi (about 0.1 % read error rate) datasets. Short-read datasets can be used for mapping to improve genome recovery via differential coverage binning, but the workflow is not designed for short-read metagenomic assembly.
 * It is also recommended that the input for mmlong2 would be at least 1 GB of sequenced data with multiple prokaryotic organisms.
 
-#### Are there special hardware or software requirements for running mmlong2?
+#### Are there special hardware or software requirements?
 * In general, mmlong2 is designed to be used on HPC clusters with ≥100 threads and ≥300 Gb of RAM allocated per workflow run.
 * The metagenomic binning part of the workflow is compute intensive (optimized for MAG yield) and might take several days to weeks to complete.
 * The mmlong2 workflow has been developed and tested on HPC nodes (Slurm cluster and bare metal) running on Ubuntu 22.04.
