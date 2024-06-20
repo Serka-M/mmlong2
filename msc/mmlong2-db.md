@@ -1,10 +1,10 @@
 ## Manual installation of databases used by mmlong2
 
-Various databases are used by the mmlong2 workflow to characterize the recovered MAGs.
+Various databases are used by the mmlong2 workflow to characterize the recovered genomes.
 Since there are multiple ways of setting up databases, code examples on how to download the relevant databases are presented below.
 <br/>
 
-The downloaded databases can be provided to mmlong2 by using the database settings of the wrapper script (e.g. `mmlong2 --database_gtdb /path/to/gtdb/database`) or by modifying the `mmlong2-proc-config.yaml` file to use the databases by default.
+The downloaded databases can be provided to mmlong2 by either using the database settings of the wrapper script (e.g. `mmlong2 --database_gtdb /path/to/gtdb/database`) or by modifying the `mmlong2-proc-config.yaml` configuration file to use the databases by default.
 <br/>
 
 #### MiDAS (Microbial Database for Activated Sludge) for 16S rRNA taxonomy
