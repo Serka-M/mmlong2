@@ -60,12 +60,12 @@ zenodo_get -r 12168493
 
 Once downloaded, to test the workflow in Nanopore mode up until the genome binning completes:
 ```
-mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 100 -run binning
+mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning
 ```
 
 To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis:
 ```
-mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 100 -dbg
+mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 60 -dbg
 ```
 
 ### Full usage
