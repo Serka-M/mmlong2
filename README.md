@@ -48,7 +48,7 @@ To acquire prokaryotic genome taxonomy and annotation results, databases are nec
 ```
 mmlong2 --install_databases
 ```
-If some of the databases are already installed, they can also be used by the workflow without downloading (e.g. `--database_gtdb` option). Alternatively, a guide for [manual](msc/mmlong2-db.md) database installation is also provided.
+If some of the databases are already installed, they can also be re-used by the workflow without downloading (e.g. `--database_gtdb` option). Alternatively, a guide for [manual](msc/mmlong2-db.md) database installation is also provided.
 <br/><br/>
 
 ## Running mmlong2
