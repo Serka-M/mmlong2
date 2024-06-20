@@ -15,7 +15,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 * Differential coverage support for improved prokaryotic genome recovery
 * Iterative ensemble binning strategy for improved prokaryotic genome recovery
 * Recovered genome quality classification according to [MIMAG guidelines](https://www.nature.com/articles/nbt.3893)
-* Supplemental prokaryotic genome quality assessment, including microdiversity approximation and chimerism checks
+* Supplemental genome quality assessment, including microdiversity approximation and chimerism checks
 * Automated taxonomic classification at genome, contig and 16S rRNA levels
 * Generation of analysis-ready [dataframes](msc/mmlong2-dfs.md) at genome and contig levels
 
