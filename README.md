@@ -58,11 +58,13 @@ For trying out the mmlong2 workflow, small test datasets can be downloaded from 
 zenodo_get -r 12168493
 ```
 <br/>
+
 Once downloaded, to test the workflow in Nanopore mode up until the genome binning completes:
 ```
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 100 -run binning
 ```
 <br/>
+
 To test the workflow in PacBio HiFi using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis:
 ```
 mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 100 -dbg
