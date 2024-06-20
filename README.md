@@ -2,7 +2,7 @@
 <img align="center" width="250" height="250" src="msc/mmlong2-logo.png" alt="logo" style="zoom:100%;" />
 </p>
 
-Genome-centric long-read metagenomics workflow for automated recovery and analysis of prokaryotic MAGs with Nanopore or PacBio HiFi sequencing data.
+Genome-centric long-read metagenomics workflow for automated recovery and analysis of prokaryotic genomes with Nanopore or PacBio HiFi sequencing data.
 The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst/mmlong).
 <br/>
 
