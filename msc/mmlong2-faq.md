@@ -27,6 +27,10 @@
 * If you want to resume the workflow from a new installation of mmlong2, it is highly recommended to first run the workflow with the `--touch` option to mark the generated files against deletion.
 * If the workflow still keeps crashing after several retries, feel free to post the error logs in the GitHub `Issues` section.
 
+#### Can I run the automated analysis modules with custom genomes?
+* Although it is possible to run the genome analysis section with a custom set of genomes by mimicking the workflow directory structure, this is quite technical to achieve and might lead to compatibility issues.
+* A more streamlined method for providing custom genomes to the workflow will be part of a future release.
+
 #### What about eukaryotic or viral genomes?
 * At the moment, mmlong2 does not feature genome recovery of viruses or eukaryotes. 
 * Expansion of the binning features, however, is planned for future releases.
