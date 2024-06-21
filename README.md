@@ -58,12 +58,12 @@ For trying out the mmlong2 workflow, small test datasets can be downloaded from 
 zenodo_get -r 12168493
 ```
 
-Once downloaded, to test the workflow in Nanopore mode up until the genome binning completes:
+Once downloaded, to test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
 ```
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning
 ```
 
-To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis:
+To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 4.5 hours, 170 Gb peak RAM):
 ```
 mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 60 -dbg
 ```
