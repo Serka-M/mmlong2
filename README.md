@@ -23,6 +23,8 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 <img src="msc/mmlong2-np-wf.png" alt="mmlong2-np" style="zoom:100%;" />
 
 ## Installation
+The mmlong2 pipeline is currently only available on Linux and was developed, tested on Ubuntu 22.04.
+
 ### Bioconda
 The recommended way of installing mmlong2 is by setting up a [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment through [Bioconda](https://bioconda.github.io/):
 ```
