@@ -26,13 +26,13 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 The mmlong2 pipeline is currently only available on Linux and was developed, tested on Ubuntu 22.04.
 
 ### Bioconda
-The recommended way of installing mmlong2 is by setting up a [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment through [Bioconda](https://bioconda.github.io/):
+The recommended way of installing mmlong2 is by setting up a [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment through [Bioconda](https://bioconda.github.io/) (ETA 20 minutes):
 ```
 conda create -c conda-forge -c bioconda mmlong2 -n mmlong2
 ```
 
 ### From source (Conda) 
-Alternatively, a local Conda environment with the latest workflow code can also be created by using the following code:
+Alternatively, a local Conda environment with the latest workflow code can also be created by using the following code (ETA 20 minutes):
 ```
 conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=8.2.3 singularity=3.8.6 zenodo_get pv pigz tar yq ncbi-amrfinderplus -y
 conda activate ./mmlong2 || source activate ./mmlong2
