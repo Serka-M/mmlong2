@@ -26,7 +26,7 @@ The mmlong2 workflow is a continuation of [mmlong](https://github.com/SorenKarst
 ### Bioconda
 The recommended way of installing mmlong2 is by setting up a [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) environment through [Bioconda](https://bioconda.github.io/):
 ```
-conda create -c conda-forge -c bioconda mmlong2
+conda create -c conda-forge -c bioconda mmlong2 -n mmlong2
 ```
 
 ### From source (Conda) 
