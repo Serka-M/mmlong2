@@ -32,7 +32,7 @@ conda create -c conda-forge -c bioconda mmlong2 -n mmlong2
 ```
 
 ### From source (Conda) 
-A local Conda environment with the latest workflow code can also be created by using the following code:
+Alternatively, a local Conda environment with the latest workflow code can also be created by using the following code:
 ```
 conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=8.2.3 singularity=3.8.6 zenodo_get pv pigz tar yq ncbi-amrfinderplus -y
 conda activate ./mmlong2 || source activate ./mmlong2
@@ -55,12 +55,14 @@ If some of the databases are already installed, they can also be re-used by the 
 
 ## Running mmlong2
 ### Usage examples
-For trying out the mmlong2 workflow, small test datasets can be downloaded from [Zenodo](https://zenodo.org/records/12168493):
+When running mmlong2 for the first time, it is highly recommended to first perform a testrun with small Nanopore or PacBio read datasets that are available at [Zenodo](https://zenodo.org/records/12168493). These can be downloaded by running:
 ```
 zenodo_get -r 12168493
 ```
 
-Once downloaded, to test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
+For the initial run of the pipeline, please only launch one instance of the run, as to not intefere with the automated dependcy installation.
+
+To test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
 ```
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning
 ```
