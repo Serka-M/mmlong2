@@ -59,7 +59,7 @@ When running mmlong2 for the first time, it is highly recommended to first perfo
 ```
 zenodo_get -r 12168493
 ```
-For the initial run of the pipeline, please only launch one instance of mmlong2, as to not interfere with the automated dependency installation (ETA 40 minutes).
+For the initial run of the pipeline, please launch only one instance of mmlong2, as to not interfere with the automated dependency installation (ETA 40 minutes).
 <br/><br/><br/>
 To test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
 ```
