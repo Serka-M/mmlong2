@@ -65,7 +65,7 @@ To test the workflow in Nanopore mode up until the genome binning completes (ETA
 ```
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning
 ```
-Once the run successfully finishes, a directory `mmlong2_testrun_np` can be expected in the current working directory, which contains a `results` directory with the main pipeline out described [here](https://github.com/Serka-M/mmlong2/tree/main?tab=readme-ov-file#overview-of-workflow-results).
+Once the run successfully finishes, a directory `mmlong2_testrun_np` can be expected in the current working directory, which contains a `results` directory with the main pipeline output, which is described [here](https://github.com/Serka-M/mmlong2/tree/main?tab=readme-ov-file#overview-of-workflow-results).
 <br/><br/><br/>
 To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 4.5 hours, 170 Gb peak RAM):
 ```
