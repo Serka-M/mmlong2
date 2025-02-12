@@ -55,19 +55,18 @@ If some of the databases are already installed, they can also be re-used by the 
 
 ## Running mmlong2
 ### Usage examples
-* When running mmlong2 for the first time, it is highly recommended to first perform a testrun with a small Nanopore or PacBio read dataset. Such example dataset are available at [Zenodo](https://zenodo.org/records/12168493). When the mmlong2 environment is active, these can be downloaded by running:
+When running mmlong2 for the first time, it is highly recommended to first perform a testrun with a small Nanopore or PacBio read dataset. Such example datasets are available at [Zenodo](https://zenodo.org/records/12168493). When the mmlong2 environment is active, these can be downloaded by running:
 ```
 zenodo_get -r 12168493
 ```
-
-* For the initial run of the pipeline, please only launch one instance of mmlong2, as to not interfere with the automated dependency installation.
-
-* To test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
+For the initial run of the pipeline, please only launch one instance of mmlong2, as to not interfere with the automated dependency installation.
+<br/>
+To test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
 ```
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning
 ```
-
-* To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 4.5 hours, 170 Gb peak RAM):
+<br/>
+To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 4.5 hours, 170 Gb peak RAM):
 ```
 mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 60 -dbg
 ```
