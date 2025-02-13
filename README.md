@@ -73,7 +73,7 @@ To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com
 mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 60 -dbg
 ```
 Expect to recover 31 MAGs (3 circular, 6 single-contig, 22 multi-contig).
-
+<br/><br/>
 ### Full usage
 ```
 MAIN INPUTS:
