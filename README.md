@@ -139,7 +139,7 @@ The prepared dataframe can be provided to the workflow through the `-cov` option
 ## Additional documentation
 * [Frequently asked questions](msc/mmlong2-faq.md)
 * [Result dataframe documentation](msc/mmlong2-dfs.md)
-* [Dependency list](msc/mmlong2-dep.md)
+* [Dependency list](msc/mmlong2-dep.md) and the specific [versions](arc)
 * [Manual database setup](msc/mmlong2-db.md)
 
 ## Future improvements
