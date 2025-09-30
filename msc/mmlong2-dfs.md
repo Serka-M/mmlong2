@@ -195,5 +195,23 @@
 | binning | qc2 | Secondary quality control of the recovered bins |
 | summary | cov | Genome coverage and relative abundance calculation with CoverM |
 | summary | stats | Genome summary statistic calculation with QUAST |
+| annotation | bakta | Bin annotation with Bakta (per-bin) |
+| annotation | bakta-sum | Summary of Bakta annotation statistics |
+| annotation | trnascan | Counting of tRNA genes with tRNAscan-SE (per-bin) |
+| annotation | trnascan-sum | Summary of tRNAscan-SE results |
+| annotation | barrnap | Counting of rRNA genes with Barrnap |
+| annotation | aggregate | Aggregation of bin annotation results |
+| taxonomy | gtdb | Bin taxonomic classification with GTDB-tk |
+| taxonomy | metabuli | Contig taxonomic classification with Metabuli |
+| taxonomy | usearch | 16S rRNA gene taxonomic classification with Usearch |
+| taxonomy | aggregate | Aggregation of taxonomic classification results |
+| extraqc | gunc | Bin chimerism and contamination check with GUNC |
+| extraqc | variants-prep | Preparation for variant calling with Longshot |
+| extraqc | variants | Nucleotide variant calling with Longshot (per-batch) |
+| extraqc | variants-sum | Summary of variant calls |
+| extraqc | aggregate | Aggregation of additional QC results |
+| stats | seq | Calculation of read and contig statistics with Nanoq |
+| stats | map | Calculation of read mapping statistics with Cramino |
+| stats | aggregate | Aggregation of miscellaneous statistics |
 
 [//]: # (Written by Mantas Sereika)
