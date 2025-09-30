@@ -210,7 +210,7 @@
 | extraqc | variants | Nucleotide variant calling with Longshot (per-batch) |
 | extraqc | variants-sum | Summary of variant calls |
 | extraqc | aggregate | Aggregation of additional QC results |
-| stats | seq | Calculation of read and contig statistics with Nanoq |
+| stats | seq | Calculation of read and contig sequence statistics with Nanoq |
 | stats | map | Calculation of read mapping statistics with Cramino |
 | stats | aggregate | Aggregation of miscellaneous statistics |
 
