@@ -1,6 +1,6 @@
 ## Description of mmlong2 result dataframes
 
-### <output_name>_general.tsv
+### Column names for <output_name>_general.tsv
 
 | Category | Description |
 | --- | --- |
@@ -41,7 +41,7 @@
 
 <br/>
 
-### <output_name>_contigs.tsv
+### Column names for <output_name>_contigs.tsv
 
 | Category | Description |
 | --- | --- |
@@ -49,21 +49,22 @@
 | len_bp | Contig length |
 | cov | Contig coverage, reported by the assembler |
 | status_circular | Contig circularity status, reported by the assembler |
-| tax_kaiju | Contig taxonomy, reported by Kaiju |
-| tax_rrna | Contig taxonomy, based on 16S rRNA classification to a rRNA database |
-| tophit_rrna | Percent identity for the best match in a rRNA database, reported by Vsearch |
+| metabuli_tax | Contig taxonomy, reported by Metabuli |
+| rrna_tax | Contig taxonomy, based on 16S rRNA classification to the rRNA reference database |
+| rrna_tophit | Percent identity of the top hit in the rRNA reference database, reported by Usearch |
+| rrna_alnlen | Alignment length (bp) of the top hit in the rRNA reference database, reported by Usearch |
 | bin | Identifier for genome bin that contains the contig |
 | gc | Contig guanine-cytosine content (%) |
 | var_n | Number of detected nucleotide variants, reported by Longshot |
 | var_perc | Percentage of contig with nucleotide variants |
 | wf_name | Workflow output name |
-| wf_mode | Workflow mode |
+| wf_read_mode | Workflow long-read mode |
 | wf_v | Workflow version |
 | wf_date | Date of workflow completion |
 
 <br/>
 
-### <output_name>_bins.tsv
+### Column names for <output_name>_bins.tsv
 
 | Category | Description |
 | --- | --- |
