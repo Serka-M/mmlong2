@@ -145,11 +145,16 @@
 | --- | --- |
 | assembly | Metagenomic assembly |
 | polishing | Optional polishing of the assembled metagenome |
+| curation | Assembly curation |
 | filtering | Metagenome filtering based on contig length and domain-level classification |
 | singletons | Recovery of single-contig genomes |
 | coverage | Read mapping and contig coverage calculation |
 | binning | Recovery of multi-contig metagenomic bins |
 | summary | Summary statistics for the recovered genomes |
+| annotation | Annotation of the recovered genomes |
+| taxonomy | Taxonomic classification (bin, contig, rRNA) |
+| extraqc | Additional bin QC (chimerism and microdiversity) |
+| stats | Miscellaneous workflow statistics |
 
 <br/>
 
