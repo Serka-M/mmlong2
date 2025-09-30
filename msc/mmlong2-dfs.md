@@ -20,21 +20,22 @@
 | contigs_len_min_bp | Length of the shortest contig, reported by Nanoq |
 | contigs_mean_len_bp | Mean contig length, reported by Nanoq |
 | contigs_median_len_bp | Median contig length, reported by Nanoq |
-| mapped_identity_median | Mean read identity (%) to the assembled metagenome, reported by Cramino |
-| mapped_identity_mean | Median read identity (%) to the assembled metagenome, reported by Cramino |
+| map_ident_median | Mean read identity (%) to the assembled metagenome, reported by Cramino |
+| map_ident_mean | Median read identity (%) to the assembled metagenome, reported by Cramino |
 | contigs_circ | Number of circular contigs, reported by the assembler |
-| all_bins | Total number of genome bins |
-| circ_bins | Number of circular genome bins |
-| hq_bins | Number of high-quality genome bins |
-| mq_bins | Number of medium-quality genome bins |
-| lq_bins | Number of low-quality genome bins |
-| contaminated_bins | Number of contaminated genome bins |
+| bins_all | Total number of genome bins |
+| bins_circ | Number of circular genome bins |
+| bins_hq | Number of high-quality genome bins |
+| bins_mq | Number of medium-quality genome bins |
+| bins_lq | Number of low-quality genome bins |
+| bins_cont | Number of contaminated genome bins |
 | bin_cov_median | Median genome bin coverage |
 | yield_assembled | Percentage of sequenced data assembled into contigs |
 | yield_binned | Percentage of sequenced data that was binned |
 | assembly_binned | Percent of assembly size that was binned |
 | wf_name | Workflow output name |
-| wf_mode | Workflow mode |
+| wf_read_mode | Workflow long-read mode |
+| wf_binning_mode | Workflow long-read mode |
 | wf_v | Workflow version |
 | wf_date | Date of workflow completion |
 
