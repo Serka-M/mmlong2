@@ -9,20 +9,19 @@ The downloaded databases can be provided to mmlong2 by either using the database
 
 #### Greengenes2 for 16S rRNA taxonomy
 ```
-wget -O db_rrna_greengenes2-2024.09.udb.gz https://zenodo.org/records/17174373/files/greengenes2_2024.09.udb.gz
-gzip -d db_rrna_greengenes2-2024.09.udb.gz
+wget -O db_rrna.udb.gz https://zenodo.org/records/17174373/files/greengenes2_2024.09.udb.gz
+gzip -d db_rrna.udb.gz
 ```
 
 #### Metabuli database for contig taxonomy
 ```
-wget https://kaiju-idx.s3.eu-central-1.amazonaws.com/2023/kaiju_db_nr_2023-05-10.tgz
-tar -xvzf kaiju_db_nr_2023-05-10.tgz
+wget -r -np -nH --cut-dirs=2 -R "index.html*" -P db_metabuli https://hulk.mmseqs.com/jaebeom/gtdb226db/
 ```
 
 #### GTDB (Genome Taxonomy Database) database for microbial genome taxonomy
 ```
-wget -O gtdb.tar.gz https://data.ace.uq.edu.au/public/gtdb/data/releases/release226/226.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r226_data.tar.gz
-tar -xvzf gtdb.tar.gz
+wget -O db_gtdb.tar.gz https://data.ace.uq.edu.au/public/gtdb/data/releases/release226/226.0/auxillary_files/gtdbtk_package/full_package/gtdbtk_r226_data.tar.gz
+tar -xvzf db_gtdb.tar.gz
 ```
 
 #### GUNC database for genome QC
@@ -33,9 +32,9 @@ gzip -d db_gunc.dmnd.gz
 
 #### Bakta databases for microbial genome annotation (requires [AMRFinderPlus](https://github.com/ncbi/amr/wiki))
 ```
-wget https://zenodo.org/records/10522951/files/db.tar.gz
-tar -xvzf db.tar.gz
-amrfinder_update --database db/amrfinderplus-db
+wget -O db_bakta.tar.xz https://zenodo.org/records/14916843/files/db.tar.xz
+tar -xJf db_bakta.tar.xz -C .
+amrfinder_update --database db_bakta/amrfinderplus-db
 ```
 
 [//]: # (Written by Mantas Sereika)
