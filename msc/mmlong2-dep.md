@@ -31,11 +31,13 @@
 * [Gunc](https://github.com/grp-bork/gunc)
 * [Barrnap](https://github.com/tseemann/barrnap)
 * [tRNAscan-SE](https://github.com/UCSC-LoweLab/tRNAscan-SE)
+* [AMRFinderPlus](https://github.com/ncbi/amr/wiki)
 * [Bakta](https://github.com/oschwengers/bakta)
 * [Usearch](https://github.com/rcedgar/usearch12)
 * [Metabuli](https://github.com/steineggerlab/Metabuli)
 * [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk)
 * [Cramino](https://github.com/wdecoster/cramino)
 * [Nanoq](https://github.com/esteinig/nanoq)
+* [yq](https://github.com/kislyuk/yq)
 
 [//]: # (Written by Mantas Sereika)
