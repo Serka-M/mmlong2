@@ -34,7 +34,7 @@ gzip -d db_gunc.dmnd.gz
 ```
 wget -O db_bakta.tar.xz https://zenodo.org/records/14916843/files/db.tar.xz
 tar -xJf db_bakta.tar.xz -C .
-amrfinder_update --database db_bakta/amrfinderplus-db
+amrfinder_update --database db/amrfinderplus-db
 ```
 
 [//]: # (Written by Mantas Sereika)
