@@ -15,7 +15,7 @@
 * It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi or short-reads) before running mmlong2.
 * Trimming off read adaptor and barcode sequences as well as filtering out very short reads (e.g. below 200 bp for Nanopore or PacBio data) might also improve genome recovery.
 
-#### Is there a way to test mmlong2 without installing over 100 Gb of databases?
+#### Is there a way to test mmlong2 without downloading over 100 Gb of databases?
 * If you are only interested in getting the genomes, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline with an identical prokaryotic genome recovery procedure and does not require large database installation.
 
 #### How were the estimated installation times calculated?
@@ -23,7 +23,11 @@
 * Please keep in mind that installation times can vary depending on the server read/write speeds and the connection speed to the servers that host the containers, databases.
 
 #### Which metagenomic assembler should I pick?
-* The choice of assembler is be situational and can depend on your sequenced sample and read type. 
+* The choice of assembler is situational and can depend on your sequenced sample and read type.
+* By default, mmlong2 runs metaFlye, which has been the standard long-read metagenome assembler for many years.
+* That said, both developers of [myloasm](https://doi.org/10.1101/2025.09.05.674543) and [metaMDBG](https://doi.org/10.1101/2025.04.22.649928) claim superior assembly metrics over metaFlye.
+* Furthermore, benchmarking by other groups ([paper 1](https://doi.org/10.1093/bioinformatics/btaf474), [paper 2](https://doi.org/10.1101/2025.04.22.649783)) showcased that myloasm and metaMDBG may feature increased rates of misassemblies.
+* Altough mmlong2 provides the option for assembling metagenomes with myloasm and metaMDBG, which can result in much higher MAG yields than with metaFlye, users should be aware that the new assemblers come with an increased risk of containing misassemblies in the recovered genomes.
 
 #### What is the difference between the binning modes?
 * Currently, mmlong2 features 3 binning modes: `fast`, `default`, and `extended`.
