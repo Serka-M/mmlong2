@@ -34,7 +34,7 @@ conda create -c conda-forge -c bioconda mmlong2 -n mmlong2
 ### From source (Conda) 
 Alternatively, a local Conda environment with the latest workflow code can also be created by using the following code (ETA 20 minutes):
 ```
-conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=8.2.3 singularity=3.8.6 zenodo_get pv pigz tar yq ncbi-amrfinderplus -y
+conda create --prefix mmlong2 -c conda-forge -c bioconda snakemake=9.12.0 singularity=3.8.6 zenodo_get=1.6.1 pv=1.6.6 pigz=2.8 tar=1.35 rsync=3.4.1 yq=3.4.3 ncbi-amrfinderplus=4.0.23 -y
 conda activate ./mmlong2 || source activate ./mmlong2
 git clone https://github.com/Serka-M/mmlong2 mmlong2/repo
 cp -r mmlong2/repo/src/* mmlong2/bin
