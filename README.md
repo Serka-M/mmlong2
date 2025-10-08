@@ -78,43 +78,55 @@ A total of 31 MAGs (3 circular, 6 single-contig, 22 multi-contig) should be reco
 ### Full usage
 ```
 MAIN INPUTS:
--np     --nanopore_reads        Path to Nanopore reads
+-np     --nanopore_reads        Path to Nanopore reads 
 -pb     --pacbio_reads          Path to PacBio HiFi reads
 -o      --output_dir            Output directory name (default: mmlong2)
 -p      --processes             Number of processes/multi-threading (default: 3)
+-bin    --binning_mode          Run pipeline with a specified binning mode (e.g. fast default extended)
 
 OPTIONAL SETTINGS:
 -db     --install_databases     Install missing databases used by the workflow
--dbd    --database_dir          Output directory for database installation (default: current working directory)
+-dbd    --database_dir          Output directory for database installation
 -cov    --coverage              CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
--run    --run_until             Run pipeline until a specified stage completes (e.g.  assembly polishing filtering singletons coverage binning taxonomy annotation extraqc stats)
--tmp    --temporary_dir         Directory for temporary files (default: current working directory)
--dbg    --use_metamdbg          Use metaMDBG for assembly of PacBio reads (default: use metaFlye)
--med    --medaka_model          Medaka polishing model (default: r1041_e82_400bps_sup_v5.0.0)
--mo     --medaka_off            Do not run Medaka polishing with Nanopore assemblies (default: use Medaka)
--vmb    --use_vamb              Use VAMB for binning (default: use GraphMB)
+-run    --run_until             Run pipeline until a specified stage completes (e.g. assembly curation filtering singletons coverage binning taxonomy annotation extraqc stats)
+-tmp    --temporary_dir         Directory for temporary files (default: $TMPDIR)
+-fly    --use_metaflye          Use metaFlye for metagenomic assembly (default)
+-dbg    --use_metamdbg          Use metaMDBG for metagenomic assembly
+-myl    --use_myloasm           Use myloasm for metagenomic assembly 
+-ca     --custom_assembly       Use a custom assembly
+-cai    --custom_assembly_info  Optional assembly information file (metaFlye format) for custom assembly
+-med    --use_medaka            Use Medaka for polishing Nanopore assemblies (default: skip Medaka)
+-mm     --medaka_model          Medaka polishing model (default: r1041_e82_400bps_sup_v5.0.0)
+-scr    --skip_curation         Skip assembly curation and removal of misassemblies (default: run curation)
+-who    --use_whokaryote        Use Whokaryote for identifying eukaryotic contigs (default: use Tiara)
 -sem    --semibin_model         Binning model for SemiBin (default: global)
--mlc    --min_len_contig        Minimum assembly contig length (default: 3000)
+-mcl    --min_contig_len        Minimum assembly contig length for binning (default: 3000)
+-mcc    --min_contig_cov        Minimum assembly contig coverage for binning (default: 0)
 -mlb    --min_len_bin           Minimum genomic bin size (default: 250000)
--rna    --database_rrna         16S rRNA database to use
+-scl    --skip_cleanup          Skip cleanup of workflow intermediate files
+-rrna   --database_rrna         16S rRNA database to use 
 -gunc   --database_gunc         Gunc database to use
 -bkt    --database_bakta        Bakta database to use
--kj     --database_kaiju        Kaiju database to use
+-mtb    --database_metabuli     Metabuli database to use 
 -gtdb   --database_gtdb         GTDB-tk database to use
+-env    --conda_envs_only       Use conda environments instead of container (default: use container)
 -h      --help                  Print help information
 -v      --version               Print workflow version number
 
 ADVANCED SETTINGS:
--fmo    --flye_min_ovlp         Minimum overlap between reads used by Flye assembler (default: auto)
--fmc    --flye_min_cov          Minimum initial contig coverage used by Flye assembler (default: 3)
--env    --conda_envs_only       Use conda environments instead of container (default: use container)
+-mmo    --myloasm_min_ovlp      Minimum overlap between reads used by myloasm assembler
+-mmc    --myloasm_min_cov       Minimum contig coverage used by myloasm assembler
+-xm     --extra_myloasm         Extra inputs for myloasm assembler
+-fmo    --flye_min_ovlp         Minimum overlap between reads used by Flye assembler
+-fmc    --flye_min_cov          Minimum initial contig coverage used by Flye assembler
+-re     --rerun-production      Rerun MAG production workflow
 -n      --dryrun                Print summary of jobs for the Snakemake workflow
 -t      --touch                 Touch Snakemake output files
 -r1     --rule1                 Run specified Snakemake rule for the MAG production part of the workflow
 -r2     --rule2                 Run specified Snakemake rule for the MAG processing part of the workflow
 -x1     --extra_inputs1         Extra inputs for the MAG production part of the Snakemake workflow
 -x2     --extra_inputs2         Extra inputs for the MAG processing part of the Snakemake workflow
--xb     --extra_inputs_bakta    Extra inputs (comma-separated) for MAG annotation using Bakta
+-xb     --extra_bakta           Extra inputs for MAG annotation with Bakta 
 ```
 
 ### Using differential coverage binning
