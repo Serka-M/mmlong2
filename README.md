@@ -126,9 +126,9 @@ IL,/path/to/your/reads/file3.fastq.gz
 ```
 The prepared dataframe can be provided to the workflow through the `-cov` option.
 
-### Overview of workflow results
-* `<output_name>_assembly.fasta` - assembled and polished metagenome
-* `<output_name>_16S.fa` - 16S rRNA sequences, recovered from the polished metagenome
+### Overview of main output (results directory)
+* `<output_name>_assembly.fasta` - metagenome assembly file
+* `<output_name>_16S.fa` - 16S rRNA gene sequences, recovered from the assembly
 * `<output_name>_bins.tsv` - per-bin results [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_binstsv)
 * `<output_name>_contigs.tsv` - per-contig results [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_contigstsv)
 * `<output_name>_general.tsv` - workflow result summary as a single row [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_generaltsv)
