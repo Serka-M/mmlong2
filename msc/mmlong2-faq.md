@@ -3,7 +3,7 @@
 #### Will my sequencing data work with mmlong2?
 * It is very situational whether mmlong2 is a good fit for your samples or project, but generally, the workflow is intended for highly complex metagenomes (e.g. soil, sewage sludge, human gut) and is not optimal for samples with very low microbial diversity (e.g. pure cultures, Zymo Mock DNA Standard).
 * Please keep in mind that mmlong2 is a long-reads-only workflow, designed to work with Nanopore (about 1 % read error rate) or with PacBio HiFi (about 0.1 % read error rate) datasets. Short-read datasets can be used for mapping to improve genome recovery via differential coverage binning, but the workflow is not designed for short-read metagenomic assembly.
-* It is also recommended that the input for mmlong2 would be at least 1 GB of sequenced data with multiple prokaryotic organisms.
+* It is highly recommended that the input for mmlong2 would be at least 1 GB of sequencing data with multiple prokaryotic organisms.
 
 #### Are there special hardware or software requirements?
 * In general, mmlong2 is designed to be used on HPC clusters with ≥100 CPU cores and ≥300 GB of RAM allocated per workflow run.
