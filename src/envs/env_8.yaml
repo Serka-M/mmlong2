@@ -3,4 +3,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - checkm-genome=1.2.2
+  - checkm2=1.1.0
+  - binette=1.1.2

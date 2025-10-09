@@ -3,10 +3,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - make
-  - cmake
-  - libgcc
-  - python=3.7
-  - pip:
-      - dgl==0.9.1
-      - https://github.com/AndreLamurias/GraphMB/releases/download/v0.1.5/graphmb-0.1.5-py3-none-any.whl
+  - comebin=1.0.4

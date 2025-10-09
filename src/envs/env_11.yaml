@@ -3,5 +3,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bakta=1.9.3
-  - trnascan-se=2.0.12
+  - gtdbtk=2.5.2
+  - numpy=2.2.6

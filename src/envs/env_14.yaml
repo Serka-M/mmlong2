@@ -3,4 +3,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - vamb=5.0.4
+  - longshot=1.0.0
+  - samtools=1.22

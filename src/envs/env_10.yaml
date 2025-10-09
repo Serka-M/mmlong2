@@ -1,6 +1,8 @@
 channels:
-  - defaults
   - conda-forge
   - bioconda
+  - defaults
 dependencies:
-  - gtdbtk=2.4.0
+  - barrnap=0.9
+  - r-base=4.4.2
+  - usearch=12.0_beta
