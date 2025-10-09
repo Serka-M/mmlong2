@@ -30,7 +30,7 @@ wget -O db_gunc.dmnd.gz https://swifter.embl.de/~fullam/gunc/gunc_db_progenomes2
 gzip -d db_gunc.dmnd.gz
 ```
 
-#### Bakta databases for microbial genome annotation (requires [AMRFinderPlus](https://github.com/ncbi/amr/wiki))
+#### Bakta database for microbial genome annotation (requires [AMRFinderPlus](https://github.com/ncbi/amr/wiki))
 ```
 wget -O db_bakta.tar.xz https://zenodo.org/records/14916843/files/db.tar.xz
 tar -xJf db_bakta.tar.xz -C .
