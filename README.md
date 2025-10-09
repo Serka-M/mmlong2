@@ -44,7 +44,7 @@ mmlong2 -h
 ```
 
 ### Databases and bioinformatics software
-Bioinformatics tools and other software dependencies will be automatically installed when running the workflow for the first time (ETA 40 minutes).
+Bioinformatic tools and other software dependencies will be automatically installed when running the workflow for the first time (ETA 40 minutes).
 By default, a pre-built [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container will be downloaded and set up, although pre-defined Conda environments can also be used by running the workflow with the `--conda_envs_only` setting.
 <br/><br/>
 To acquire prokaryotic genome taxonomy and annotation results, databases are necessary and can be automatically installed by running the following command:
