@@ -16,10 +16,10 @@
 * Trimming off read adaptor and barcode sequences as well as filtering out very short reads (e.g. below 200 bp for Nanopore or PacBio data) can also improve genome recovery.
 
 #### Is there a way to test mmlong2 without downloading over 100 Gb of databases?
-* If you are only interested in getting the genomes, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline with an identical prokaryotic genome recovery procedure and does not require large database installation.
+* If you are only interested in recovering microbial genomes, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline that provides an identical prokaryotic genome recovery workflow without requiring large database installation.
 
-#### How were the estimated installation times calculated?
-* The installation ETAs reported in the `README` correspond to the time it took for us to fully set up the pipeline on our compute cluster.
+#### How were the estimated installation and run times calculated?
+* The ETAs reported in the `README` correspond to the time it took for us to fully set up the pipeline on our compute cluster.
 * Please keep in mind that installation times can vary depending on the server read/write speeds and the connection speed to the servers that host the containers, databases.
 
 #### Which metagenomic assembler should I pick?
