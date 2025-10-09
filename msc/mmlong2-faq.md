@@ -43,7 +43,7 @@
 #### What should be done when mmlong2 crashes?
 * If the workflow crashes, try inspecting the Stdout and Snakemake logs for troubleshooting.
 * The workflow can usually be resumed by re-running the same commands. 
-* If you want to resume the workflow from a new installation of mmlong2, it is highly recommended to first run the workflow with the `--touch` option to mark the generated files against deletion.
+* If you want to resume the workflow from a new installation of mmlong2, it is highly recommended to first run the workflow with the `--touch` option to prevent existing files from being deleted.
 * If the workflow keeps crashing after several retries, feel free to post the error logs in the GitHub `Issues` section.
 
 #### Can I run the automated analysis modules with custom genomes?
