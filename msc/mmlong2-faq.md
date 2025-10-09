@@ -13,7 +13,7 @@
 
 #### Is read data pre-processing required by the workflow?
 * It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi or short-reads) before running mmlong2.
-* Trimming off read adaptor and barcode sequences as well as filtering out very short reads (e.g. below 200 bp for Nanopore or PacBio data) might also improve genome recovery.
+* Trimming off read adaptor and barcode sequences as well as filtering out very short reads (e.g. below 200 bp for Nanopore or PacBio data) can also improve genome recovery.
 
 #### Is there a way to test mmlong2 without downloading over 100 Gb of databases?
 * If you are only interested in getting the genomes, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline with an identical prokaryotic genome recovery procedure and does not require large database installation.
