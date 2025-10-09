@@ -26,7 +26,7 @@
 * The choice of assembler is situational and can depend on your sequenced sample and read type.
 * By default, mmlong2 runs metaFlye, which has been the standard long-read metagenome assembler for several years.
 * That said, both developers of [myloasm](https://doi.org/10.1101/2025.09.05.674543) and [metaMDBG](https://doi.org/10.1101/2025.04.22.649928) claim superior assembly metrics over metaFlye.
-* Furthermore, benchmarking by other groups ([paper 1](https://doi.org/10.1093/bioinformatics/btaf474), [paper 2](https://doi.org/10.1101/2025.04.22.649783)) showcased that myloasm and metaMDBG may feature increased rates of misassemblies.
+* Furthermore, benchmarking by other groups ([paper 1](https://doi.org/10.1093/bioinformatics/btaf474), [paper 2](https://doi.org/10.1101/2025.04.22.649783)) demonstrated that myloasm and metaMDBG may feature increased rates of misassemblies.
 * Although mmlong2 provides the option for assembling metagenomes with myloasm or metaMDBG, which can result in much higher MAG yields than with metaFlye, users should be aware that these new assemblers carry a higher risk of misassemblies in the recovered genomes.
 
 #### What is the difference between the binning modes?
