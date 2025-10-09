@@ -145,7 +145,9 @@ The prepared dataframe can be provided to the workflow through the `-cov` option
 * `<output_name>_bins.tsv` - per-bin results [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_binstsv)
 * `<output_name>_contigs.tsv` - per-contig results [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_contigstsv)
 * `<output_name>_general.tsv` - workflow result summary as a single row [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_generaltsv)
+* `<output_name>_usage.tsv` - [dataframe](msc/mmlong2-dfs.md#column-names-for-output_name_usagetsv) for compute resource usage
 * `dependencies.csv`- list of dependencies used and their versions
+* `databases.csv`- list of paths to the databases used
 * `bins` - directory for metagenome assembled genomes
 * `bakta` - directory, containing genome annotation results from [bakta](https://github.com/oschwengers/bakta)
 
