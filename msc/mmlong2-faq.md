@@ -20,7 +20,7 @@
 
 #### How were the estimated installation and run times calculated?
 * The ETAs reported in the `README` reflect the time it took us to fully set up and run the pipeline on our compute cluster.
-* Please keep in mind that installation and run times can vary depending on the server read/write speeds and the network connection speed to the servers that host the containers and databases.
+* Please note that installation and run times may vary depending on the server read/write speeds and the network connection speed to the servers hosting the containers and databases.
 
 #### Which metagenomic assembler should I pick?
 * The choice of assembler is situational and can depend on your sequenced sample and read type.
