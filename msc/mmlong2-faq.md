@@ -51,7 +51,7 @@
 * A more streamlined method for providing custom genomes to the workflow will be part of a future release.
 
 #### What about eukaryotic or viral genomes?
-* At the moment, mmlong2 does not feature recovery of viral or eukaryotic genomes. 
+* At the moment, mmlong2 does not recover viral nor eukaryotic genomes. 
 * Expansion of the binning features, however, is planned for future releases.
 
 [//]: # (Written by Mantas Sereika)
