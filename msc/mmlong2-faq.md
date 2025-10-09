@@ -9,7 +9,7 @@
 * In general, mmlong2 is designed to be used on HPC clusters with ≥100 CPU cores and ≥300 GB of RAM allocated per workflow run.
 * The metagenomic assembly and binning sections of the workflow can be compute intensive and might take several days to weeks to complete.
 * The mmlong2 workflow has been developed and tested on HPC nodes (Slurm cluster and bare metal) running on Ubuntu 22.04.
-* Since mmlong2 uses many software dependencies and databases, it is recommended to consult your server admin for installing the worklfow.
+* Since mmlong2 uses many software dependencies and databases, it is recommended to consult your server admin about installing the worklfow.
 
 #### Is read data pre-processing required by the workflow?
 * It is highly recommended to perform read quality filtering (e.g. remove reads with less than Phred Q10 for Nanopore and Phred Q20 for PacBio HiFi or short-reads) before running mmlong2.
