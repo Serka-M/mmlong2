@@ -1,6 +1,6 @@
 #!/bin/bash
 # DESCRIPTION: Wrapper script for running mmlong2 Snakemake workflow
-# AUTHOR: Mantas Sereika (mase@bio.aau.dk)
+# AUTHOR: Mantas Sereika, mase@bio.aau.dk, 2025
 # LICENSE: GNU General Public License
 
 # Pre-set default settings
@@ -20,26 +20,34 @@ sample=$(grep sample $config1 | cut -d" " -f2 | tr -d '\r')
 loc=$(grep loc $config1 | cut -d" " -f2 | tr -d '\r')
 proc=$(grep -w proc $config1 | cut -d" " -f2 | tr -d '\r')
 cov=$(grep reads_diffcov $config1 | cut -d" " -f2 | tr -d '\r')
-flye_min_ovlp=$(grep flye_ovlp $config1 | cut -d" " -f2 | tr -d '\r')
+assembler=$(grep assembler $config1 | cut -d" " -f2 | tr -d '\r')
+custom_assembly=$(grep custom_assembly $config1 | cut -d" " -f2 | tr -d '\r')
+assembly_info=$(grep assembly_info $config1 | cut -d" " -f2 | tr -d '\r')
+myloasm_min_cov=$(grep myloasm_cov $config1 | cut -d" " -f2 | tr -d '\r')
+myloasm_min_ovlp=$(grep myloasm_ovlp $config1 | cut -d" " -f2 | tr -d '\r')
+myloasm_extra=$(grep myloasm_extra $config1 | cut -d" " -f2 | tr -d '\r')
 flye_min_cov=$(grep flye_cov $config1 | cut -d" " -f2 | tr -d '\r')
-mdbg_status=$(grep mdbg_status $config1 | cut -d" " -f2 | tr -d '\r')
+flye_min_ovlp=$(grep flye_ovlp $config1 | cut -d" " -f2 | tr -d '\r')
+tiara_status=$(grep tiara_status $config1 | cut -d" " -f2 | tr -d '\r')
 medaka_status=$(grep medaka_status $config1 | cut -d" " -f2 | tr -d '\r')
 medak_mod_pol=$(grep medak_mod_pol $config1 | cut -d" " -f2 | tr -d '\r')
+curation_status=$(grep curation_status $config1 | cut -d" " -f2 | tr -d '\r')
 min_contig_len=$(grep min_contig_len $config1 | cut -d" " -f2 | tr -d '\r')
+min_contig_cov=$(grep min_contig_cov $config1 | cut -d" " -f2 | tr -d '\r')
 min_mag_len=$(grep min_mag_len $config1 | cut -d" " -f2 | tr -d '\r')
 semibin_mod=$(grep semibin_mod $config1 | cut -d" " -f2 | tr -d '\r')
-vamb_status=$(grep vamb_status $config1 | cut -d" " -f2 | tr -d '\r')
 bakta_extra=$(grep bakta_extra $config2 | cut -d" " -f2 | tr -d '\r')
 db_rrna=$(grep db_rrna $config2 | cut -d" " -f2 | tr -d '\r')
 db_gunc=$(grep db_gunc $config2 | cut -d" " -f2 | tr -d '\r')
 db_bakta=$(grep db_bakta $config2 | cut -d" " -f2 | tr -d '\r')
-db_kaiju=$(grep db_kaiju $config2 | cut -d" " -f2 | tr -d '\r')
+db_metabuli=$(grep db_metabuli $config2 | cut -d" " -f2 | tr -d '\r')
 db_gtdb=$(grep db_gtdb $config2 | cut -d" " -f2 | tr -d '\r')
 dl_rrna=$(grep dl_rrna $config2 | cut -d" " -f2 | tr -d '\r')
 dl_gunc=$(grep dl_gunc $config2 | cut -d" " -f2 | tr -d '\r')
 dl_bakta=$(grep dl_bakta $config2 | cut -d" " -f2 | tr -d '\r')
-dl_kaiju=$(grep dl_kaiju $config2 | cut -d" " -f2 | tr -d '\r')
+dl_metabuli=$(grep dl_metabuli $config2 | cut -d" " -f2 | tr -d '\r')
 dl_gtdb=$(grep dl_gtdb $config2 | cut -d" " -f2 | tr -d '\r')
+cleanup_status=$(grep cleanup_status $config1 | cut -d" " -f2 | tr -d '\r')
 apptainer_status=$(grep apptainer_status $config1 | cut -d" " -f2 | tr -d '\r')
 env_1=$(grep env_1 $config1 | cut -d" " -f2 | tr -d '\r')
 env_2=$(grep env_2 $config1 | cut -d" " -f2 | tr -d '\r')
@@ -49,23 +57,27 @@ env_5=$(grep env_5 $config1 | cut -d" " -f2 | tr -d '\r')
 env_6=$(grep env_6 $config1 | cut -d" " -f2 | tr -d '\r')
 env_7=$(grep env_7 $config1 | cut -d" " -f2 | tr -d '\r')
 env_8=$(grep env_8 $config1 | cut -d" " -f2 | tr -d '\r')
-env_9=$(grep env_9 $config2 | cut -d" " -f2 | tr -d '\r')
+env_9=$(grep env_9 $config1 | cut -d" " -f2 | tr -d '\r')
 env_10=$(grep env_10 $config2 | cut -d" " -f2 | tr -d '\r')
 env_11=$(grep env_11 $config2 | cut -d" " -f2 | tr -d '\r')
 env_12=$(grep env_12 $config2 | cut -d" " -f2 | tr -d '\r')
 env_13=$(grep env_13 $config2 | cut -d" " -f2 | tr -d '\r')
+env_14=$(grep env_14 $config2 | cut -d" " -f2 | tr -d '\r')
 db_install="FALSE"
 db_dir=$(pwd)
 dryrun=""
 touch=""
 stage="OFF"
-stages=("OFF" "assembly" "polishing" "filtering" "singletons" "coverage" "binning" "taxonomy" "annotation" "extraqc" "stats")
+stages=("OFF" "assembly" "curation" "filtering" "singletons" "coverage" "binning" "taxonomy" "annotation" "extraqc" "stats")
+binmode=$(grep binmode $config1 | cut -d" " -f2 | tr -d '\r')
+binmodes=("fast" "default" "extended")
+rerun="OFF"
 rule1="Finalise"
 rule2="Finalise"
 extra1=""
 extra2=""
 apptainer="apptainer"
-tmp=$(pwd)
+tmp=$TMPDIR
 
 # Usage instructions for terminal interface
 usage_text="
@@ -77,39 +89,53 @@ MAIN INPUTS:
 -pb	--pacbio_reads		Path to PacBio HiFi reads (default: $fastq)
 -o	--output_dir		Output directory name (default: $sample)
 -p	--processes		Number of processes/multi-threading (default: $proc)
+-bin	--binning_mode		Run pipeline with a specified binning mode (e.g. ${binmodes[*]})
  
 OPTIONAL SETTINGS:
 -db 	--install_databases	Install missing databases used by the workflow
 -dbd 	--database_dir		Output directory for database installation (default: $(pwd))
 -cov 	--coverage		CSV dataframe for differential coverage binning (e.g. NP/PB/IL,/path/to/reads.fastq)
 -run	--run_until		Run pipeline until a specified stage completes (e.g. ${stages[*]/$stage})
--tmp	--temporary_dir		Directory for temporary files (default: none)
--dbg	--use_metamdbg		Use metaMDBG for assembly of PacBio reads (default: use metaFlye)
--med	--medaka_model		Medaka polishing model (default: $medak_mod_pol)
--mo	--medaka_off		Do not run Medaka polishing with Nanopore assemblies (default: use Medaka)
--vmb	--use_vamb		Use VAMB for binning (default: use GraphMB)
+-tmp	--temporary_dir		Directory for temporary files (default: $tmp)
+-fly	--use_metaflye		Use metaFlye for metagenomic assembly (default: use $assembler)
+-dbg	--use_metamdbg		Use metaMDBG for metagenomic assembly (default: use $assembler)
+-myl	--use_myloasm		Use myloasm for metagenomic assembly (default: use $assembler)
+-ca	--custom_assembly	Use a custom assembly (default: use $assembler)
+-cai	--custom_assembly_info	Optional assembly information file (metaFlye format) for custom assembly
+-med	--use_medaka		Use Medaka for polishing Nanopore assemblies (default: skip Medaka)
+-mm	--medaka_model		Medaka polishing model (default: $medak_mod_pol)
+-scr	--skip_curation		Skip assembly curation and removal of misassemblies (default: run curation)
+-who	--use_whokaryote	Use Whokaryote for identifying eukaryotic contigs (default: use Tiara)
 -sem	--semibin_model		Binning model for SemiBin (default: $semibin_mod)
--mlc	--min_len_contig	Minimum assembly contig length (default: $min_contig_len)
+-mcl	--min_contig_len	Minimum assembly contig length for binning (default: $min_contig_len)
+-mcc	--min_contig_cov	Minimum assembly contig coverage for binning (default: $min_contig_cov)
 -mlb	--min_len_bin		Minimum genomic bin size (default: $min_mag_len)
--rna	--database_rrna		16S rRNA database to use (default: $db_rrna)
+-scl	--skip_cleanup		Skip cleanup of workflow intermediate files
+-rrna	--database_rrna		16S rRNA database to use (default: $db_rrna)
 -gunc	--database_gunc		Gunc database to use (default: $db_gunc)
 -bkt	--database_bakta	Bakta database to use (default: $db_bakta)
--kj	--database_kaiju	Kaiju database to use (default: $db_kaiju)
+-mtb	--database_metabuli	Metabuli database to use (default: $db_metabuli)
 -gtdb	--database_gtdb		GTDB-tk database to use (default: $db_gtdb)
+-env	--conda_envs_only	Use conda environments instead of container (default: use container)
 -h	--help			Print help information
 -v	--version		Print workflow version number
 
 ADVANCED SETTINGS:
+-mmo	--myloasm_min_ovlp	Minimum overlap between reads used by myloasm assembler (default: $myloasm_min_ovlp)
+-mmc	--myloasm_min_cov	Minimum contig coverage used by myloasm assembler (default: $myloasm_min_cov)
+-xm	--extra_myloasm		Extra inputs for myloasm assembler (default: none)
 -fmo	--flye_min_ovlp		Minimum overlap between reads used by Flye assembler (default: auto)
 -fmc	--flye_min_cov		Minimum initial contig coverage used by Flye assembler (default: $flye_min_cov)
--env	--conda_envs_only	Use conda environments instead of container (default: use container)
+-re	--rerun-production	Rerun MAG production workflow
 -n	--dryrun		Print summary of jobs for the Snakemake workflow
 -t	--touch			Touch Snakemake output files
 -r1	--rule1			Run specified Snakemake rule for the MAG production part of the workflow
 -r2	--rule2			Run specified Snakemake rule for the MAG processing part of the workflow
 -x1	--extra_inputs1		Extra inputs for the MAG production part of the Snakemake workflow (default: none)
 -x2	--extra_inputs2		Extra inputs for the MAG processing part of the Snakemake workflow (default: none)
--xb	--extra_inputs_bakta	Extra inputs (comma-separated) for MAG annotation using Bakta (default: none)
+-xb	--extra_bakta		Extra inputs for MAG annotation with Bakta (default: none)
+
+Aalborg University, Denmark, 2025
 
 "
 
@@ -122,33 +148,45 @@ while test $# -gt 0; do
                 -dbd | --database_dir) shift; db_dir=$1 && db_install="TRUE"; shift;;
                 -n | --dryrun) dryrun="-n"; shift;;	
                 -t | --touch) touch="--touch"; shift;;	
-                -mo | --medaka_off) medaka_status="FALSE"; shift;;	
+                -med | --use_medaka) medaka_status="TRUE"; shift;;
+                -who | --use_whokaryote) tiara_status="FALSE"; shift;;	
                 -env | --conda_envs_only) apptainer="" && apptainer_status="FALSE"; shift;;	
                 -np | --nanopore_reads) shift; fastq=$1 && mode="Nanopore-simplex"; shift;;
                 -pb | --pacbio_reads) shift; fastq=$1 && mode="PacBio-HiFi"; shift;;
                 -o | --output_dir) shift; sample=$1; shift;;
                 -p | --processes) shift; proc=$1; shift;;
                 -cov | --coverage) shift; cov=$1; shift;;
+                -bin | --binning_mode) shift; binmode=$1; shift;;
                 -run | --run_until) shift; stage=$1; shift;;
                 -tmp | --temporary_dir) shift; tmp=$1; shift;;
+                -ca | --custom_assembly) shift; custom_assembly=$1 && assembler="custom"; shift;; 
+                -cai | --custom_assembly_info) shift; assembly_info=$1; shift;;
+                -mmo | --myloasm_min_ovlp) shift; myloasm_min_ovlp=$1; shift;;
+                -mmc | --myloasm_min_cov) shift; myloasm_min_cov=$1; shift;;
                 -fmo | --flye_min_ovlp) shift; flye_min_ovlp=$1; shift;;
                 -fmc | --flye_min_cov) shift; flye_min_cov=$1; shift;;
-                -med | --medaka_model) shift; medak_mod_pol=$1; shift;;				
-                -mlc | --min_len_contig) shift; min_contig_len=$1; shift;;
+                -mm | --medaka_model) shift; medak_mod_pol=$1 && medaka_status="TRUE"; shift;;					
+                -mcl | --min_contig_len) shift; min_contig_len=$1; shift;;
+                -mcc | --min_contig_cov) shift; min_contig_cov=$1; shift;;
                 -mlb | --min_len_bin) shift; min_mag_len=$1; shift;;
                 -sem | --semibin_model) shift; semibin_mod=$1; shift;;
-                -dbg | --use_metamdbg) mdbg_status="TRUE"; shift;;
-                -vmb | --use_vamb) vamb_status="TRUE"; shift;;
-                -rna | --database_rrna) shift; db_rrna=$1; shift;;		
+                -fly | --use_metaflye) assembler="metaflye"; shift;;
+                -dbg | --use_metamdbg) assembler="metamdbg"; shift;;
+                -myl | --use_myloasm) assembler="myloasm"; shift;;
+                -scr | --skip_assembly_curation) curation_status="FALSE"; shift;;
+                -scl | --skip_cleanup) cleanup_status="FALSE"; shift;;
+                -re | --rerun-production) rerun="ON"; shift;;	
+                -rrna | --database_rrna) shift; db_rrna=$1; shift;;		
                 -gunc | --database_gunc) shift; db_gunc=$1; shift;;	
                 -bkt | --database_bakta) shift; db_bakta=$1; shift;;	
-                -kj | --database_kaiju) shift; db_kaiju=$1; shift;;	
+                -mtb | --database_metabuli) shift; db_metabuli=$1; shift;;	
                 -gtdb | --database_gtdb) shift; db_gtdb=$1; shift;;
                 -r1 | --rule1) shift; rule1=$1; shift;;	
                 -r2 | --rule2) shift; rule2=$1; shift;;					
                 -x1 | --extra_inputs1) shift; extra1=$1; shift;;	
                 -x2 | --extra_inputs2) shift; extra2=$1; shift;;		
-                -xb | --extra_inputs_bakta) shift; bakta_extra=$1; shift;;					
+                -xb | --extra_bakta) shift; bakta_extra=$(printf '%s' "$1" | tr ' ' ','); shift;;					
+                -xm | --extra_myloasm) shift; myloasm_extra=$(printf '%s' "$1" | tr ' ' ','); shift;;
                 *)
                    printf "ERROR: $1 is not a recognized input! \nType --help for more information on workflow usage.\n"
                    exit 1;
@@ -169,8 +207,11 @@ cd ${db_dir}/mmlong2_db_v${version}
 if [ ! -f $db_rrna ]
 then
 	echo "Downloading and installing 16S rRNA database..."
-	wget -O db_rrna.fasta $dl_rrna
-	yq -y -i ".db_rrna = \"${db_dir}/mmlong2_db_v${version}/db_rrna.fasta\"" $config2
+	wget -O db_rrna_greengenes2-2024.09.udb.gz $dl_rrna
+	echo "Extracting..."
+	pv db_rrna_greengenes2-2024.09.udb.gz | pigz -dc - > db_rrna_greengenes2-2024.09.udb
+	yq -y -i ".db_rrna = \"${db_dir}/mmlong2_db_v${version}/db_rrna_greengenes2-2024.09.udb\"" $config2
+	rm db_rrna_greengenes2-2024.09.udb.gz
 	echo "16S rRNA database installation completed at $(date +'%Y-%d-%m %H:%M:%S')"
 else
 	echo "WARNING: file for 16S rRNA database found. Installation will be skipped."
@@ -189,30 +230,26 @@ else
 	echo "WARNING: file for GUNC database found. Installation will be skipped."
 fi
 
-if [ ! -d $db_kaiju ]
+if [ ! -d $db_metabuli ]
 then
-	echo "Downloading and installing Kaiju database..."
-	wget -O kaiju.tar.gz $dl_kaiju
-	echo "Extracting..."
-	mkdir db_kaiju
-	pv kaiju.tar.gz | pigz -dc - | tar xf - -C db_kaiju/.
-	yq -y -i ".db_kaiju = \"${db_dir}/mmlong2_db_v${version}/db_kaiju\"" $config2
-	rm kaiju.tar.gz 
-	echo "Kaiju database installation completed at $(date +'%Y-%d-%m %H:%M:%S')"
+	echo "Downloading and installing Metabuli database..."
+	wget -r -np -nH --cut-dirs=2 -R "index.html*" -P db_metabuli $dl_metabuli
+	yq -y -i ".db_metabuli = \"${db_dir}/mmlong2_db_v${version}/db_metabuli\"" $config2
+	echo "Metabuli database installation completed at $(date +'%Y-%d-%m %H:%M:%S')"
 else
-	echo "WARNING: directory for Kaiju database found. Installation will be skipped."
+	echo "WARNING: directory for Metabuli database found. Installation will be skipped."
 fi
 
 if [ ! -d $db_bakta ]
 then
 	echo "Downloading and installing Bakta database..."
-	wget -O bakta.tar.gz $dl_bakta
+	wget -O bakta.tar.xz $dl_bakta
 	echo "Extracting..."
-	pv bakta.tar.gz | pigz -dc - | tar xf - -C .
+	pv bakta.tar.xz | tar -xJf - -C .
 	mv db db_bakta
 	amrfinder_update --force_update --database db_bakta/amrfinderplus-db
 	yq -y -i ".db_bakta = \"${db_dir}/mmlong2_db_v${version}/db_bakta\"" $config2
-	rm bakta.tar.gz
+	rm bakta.tar.xz
 	echo "Bakta database installation completed at $(date +'%Y-%d-%m %H:%M:%S')"
 else
 	echo "WARNING: directory for Bakta database found. Installation will be skipped."
@@ -224,7 +261,7 @@ then
 	wget -O gtdb.tar.gz $dl_gtdb
 	echo "Extracting..."
 	pv gtdb.tar.gz | pigz -dc - | tar xf - -C .
-	mv release220 db_gtdb
+	mv release226 db_gtdb
 	yq -y -i ".db_gtdb = \"${db_dir}/mmlong2_db_v${version}/db_gtdb\"" $config2
 	rm gtdb.tar.gz
 	echo "GTDB database installation completed at $(date +'%Y-%d-%m %H:%M:%S')"
@@ -241,43 +278,55 @@ fi
 
 # Basic checks
 if [[ ! " ${stages[@]} " =~ " ${stage} " ]]; then echo "ERROR: provided input for early stoppage not recognized" && exit 1; fi
+if [[ ! " ${binmodes[@]} " =~ " ${binmode} " ]]; then echo "ERROR: provided setting for binning mode not recognized" && exit 1; fi
 if [ $fastq == "none" ]; then printf -- "$usage_text" && echo "ERROR: Sequencing reads not provided" && exit 1; fi
 if [ ! -f $fastq ]; then printf -- "$usage_text" && echo "ERROR: Provided sequencing read file not found" && exit 1; fi
 if [ ! $cov == "none" ] && [ ! -f $cov ]; then printf -- "$usage_text" && echo "ERROR: Provided dataframe for differential coverage binning not found" && exit 1; fi
+if [ $assembler == "custom" ]; then if [ ! -f $custom_assembly ]; then printf -- "$usage_text" && echo "ERROR: Provided custom assembly not found" && exit 1; fi; fi
+if [ ! $assembly_info == "FALSE" ]; then if [ ! -f $assembly_info ]; then printf -- "$usage_text" && echo "ERROR: Provided custom assembly information file not found" && exit 1; fi; fi 
 bytes_left="$(df --output=avail -B 1 "$(pwd)" | tail -n 1)" && gigabytes_left=$(($bytes_left/1024**3))
 if [ $gigabytes_left -lt 100 ]; then  echo "ERROR: Less than 100 GB of free space left in working directory" && exit 1; else echo "$gigabytes_left GB of free space available in working directory"; fi
+if ! command -v conda &> /dev/null; then echo "ERROR: Dependency (((conda))) could not be found" && exit 1; fi
 if ! command -v snakemake &> /dev/null; then echo "ERROR: Dependency (((snakemake))) could not be found" && exit 1; fi
 if ! command -v singularity &> /dev/null; then echo "ERROR: Dependency (((singularity))) could not be found" && exit 1; fi
 if ! command -v dirname &> /dev/null; then echo "ERROR: Dependency (((dirname))) could not be found" && exit 1; fi
-if [ $mode == "Nanopore-simplex" ]; then mdbg_status="FALSE"; fi
-if [ $mdbg_status == "TRUE" ]; then vamb_status="TRUE"; fi
+if [ $mode == "PacBio-HiFi" ]; then medaka_status="FALSE"; fi
 
 # Setup singularity container
 if [[ "$apptainer" == "apptainer" ]] && [[ ! -d  "$script/sing-mmlong2-lite" || ! -d  "$script/sing-mmlong2-proc" ]]
 then
-	echo "Downloading pre-built Singularity containers..."
+	echo "Pre-built Singularity containers not found. Starting download and extraction..."
+	sleep 10s
 	zenodo_get -r $zenodo_id -o $script
 	if [[ ! -d  "$script/sing-mmlong2-lite" ]]; then echo "Extracting containers (1/2)..." && pv $script/sing-mmlong2-lite-*.tar.gz | pigz -dc - | tar xf - -C $script/.; fi
 	if [[ ! -d  "$script/sing-mmlong2-proc" ]]; then echo "Extracting containers (2/2)..." && pv $script/sing-mmlong2-proc-*.tar.gz | pigz -dc - | tar xf - -C $script/.; fi
 fi
 
 # Configure early stoppage
-if [ $stage == "assembly" ]; then rule1="Assembly" && rule2="OFF"; fi
-if [ $stage == "polishing" ]; then rule1="Polishing_stitch" && rule2="OFF"; fi
-if [ $stage == "filtering" ]; then rule1="Filtering_eukaryotes" && rule2="OFF"; fi
-if [ $stage == "singletons" ]; then rule1="Singletons_qc" && rule2="OFF"; fi
-if [ $stage == "coverage" ]; then rule1="Coverage_aggregate" && rule2="OFF"; fi
-if [ $stage == "binning" ]; then rule2="OFF"; fi
+if [ $stage == "assembly" ]; then if [ $assembler == "myloasm" ]; then rule1="Assembly_myloasm"; fi ; fi
+if [ $stage == "assembly" ]; then if [ $assembler == "metaflye" ]; then rule1="Assembly_metaFlye"; fi ; fi
+if [ $stage == "assembly" ]; then if [ $assembler == "metamdbg" ]; then rule1="Assembly_metaMDBG"; fi ; fi
+if [ $stage == "assembly" ]; then if [ $assembler == "custom" ]; then rule1="Assembly_custom"; fi ; fi
+if [ $stage == "curation" ]; then rule1="Curation_selection" && curation_status="TRUE"; fi
+if [ $stage == "filtering" ]; then rule1="Filtering_eukaryotes"; fi
+if [ $stage == "singletons" ]; then rule1="Singletons_qc"; fi
+if [ $stage == "coverage" ]; then rule1="Coverage_aggregate"; fi
+if [ $stage == "binning" ]; then rule2="OFF" && rerun="ON"; fi
 if [ $stage == "taxonomy" ]; then rule2="Taxonomy_aggregate"; fi
 if [ $stage == "annotation" ]; then rule2="Annotation_aggregate"; fi
 if [ $stage == "extraqc" ]; then rule2="ExtraQC_aggregate"; fi
 if [ $stage == "stats" ]; then rule2="Stats_aggregate"; fi
-if [ ! $rule1 == "Finalise" ]; then rule2="OFF"; fi
+if [ ! $rule1 == "Finalise" ]; then rule2="OFF" && rerun="ON"; fi
 
 # Configure input paths
 if [[ "$sample" = *"/"* ]]; then if [[ "$sample" = /* ]]; then loc="$(dirname $sample)" && sample="$(basename $sample)"; else loc="$(pwd)/$(dirname $sample)" && sample="$(basename $sample)"; fi; else loc=$(pwd); fi
 if [[ ! "$fastq" = /* ]]; then fastq="$(pwd)/$fastq"; fi
 if [[ ! "$tmp" = /* ]]; then tmp="$(pwd)/$tmp"; fi
+if [[ ! "$cov" = /* && ! "$cov" = "none" ]]; then cov="$(pwd)/$cov"; fi
+
+# Configure cache and temporary file paths
+if [ ! -d ".pycache" ]; then mkdir .pycache; fi
+export PYTHONPYCACHEPREFIX="$(pwd)/.pycache"
 export TMPDIR=$tmp
 export SNAKEMAKE_SOURCE_CACHE=$tmp
 export SNAKEMAKE_OUTPUT_CACHE=$tmp
@@ -286,6 +335,7 @@ export XDG_CACHE_HOME=$tmp
 # Configure environments for conda-only mode
 if [[ "$apptainer" == "" ]]
 then
+conda config --set channel_priority flexible
 env_1=$script/envs/env_1.yaml
 env_2=$script/envs/env_2.yaml
 env_3=$script/envs/env_3.yaml
@@ -299,6 +349,7 @@ env_10=$script/envs/env_10.yaml
 env_11=$script/envs/env_11.yaml
 env_12=$script/envs/env_12.yaml
 env_13=$script/envs/env_13.yaml
+env_14=$script/envs/env_14.yaml
 fi
 
 # Configure Singularity bindings for MAG production workflow
@@ -313,30 +364,46 @@ if [ ! $cov == "none" ]; then while read line || [ -n "$line" ]; do
 done < $cov; fi;
 
 # Run snakemake workflow for MAG production 
-if [ ! -f $loc/$sample/tmp/binning/bins_mmlong2-lite.tsv ]; then
+if [ $rerun == "ON" ] || [ ! -f $loc/$sample/results/${sample}_bins.tsv ] || ! ls $loc/$sample/results/bins/*.fa >/dev/null 2>&1; then
 echo "Starting Snakemake workflow (MAG production) for $mode reads and $proc multi-threading instances..."
 snakemake $dryrun $touch --software-deployment-method conda $apptainer --apptainer-args "$singularity_binds" --cores $proc --resources usage=100 --rerun-incomplete --nolock -s $snakefile1 --configfile $config1 -R $rule1 --until $rule1 \
-	--config sing=$sing1 sample=$sample loc=$loc fastq=$fastq proc=$proc mode=$mode reads_diffcov=$cov flye_ovlp=$flye_min_ovlp flye_cov=$flye_min_cov mdbg_status=$mdbg_status medaka_status=$medaka_status medak_mod_pol=$medak_mod_pol \
-	min_contig_len=$min_contig_len min_mag_len=$min_mag_len semibin_mod=$semibin_mod vamb_status=$vamb_status apptainer_status=$apptainer_status env_1=$env_1 env_2=$env_2 env_3=$env_3 env_4=$env_4 env_5=$env_5 env_6=$env_6 env_7=$env_7 env_8=$env_8 $extra1; fi
+	--config sing=$sing1 sample=$sample loc=$loc fastq=$fastq proc=$proc mode=$mode reads_diffcov=$cov assembler=$assembler custom_assembly=$custom_assembly assembly_info=$assembly_info myloasm_ovlp=$myloasm_min_ovlp myloasm_cov=$myloasm_min_cov myloasm_extra=$myloasm_extra \
+	flye_ovlp=$flye_min_ovlp flye_cov=$flye_min_cov medaka_status=$medaka_status medak_mod_pol=$medak_mod_pol curation_status=$curation_status tiara_status=$tiara_status binmode=$binmode min_contig_len=$min_contig_len min_contig_cov=$min_contig_cov \
+	min_mag_len=$min_mag_len semibin_mod=$semibin_mod cleanup_status=$cleanup_status apptainer_status=$apptainer_status env_1=$env_1 env_2=$env_2 env_3=$env_3 env_4=$env_4 env_5=$env_5 env_6=$env_6 env_7=$env_7 env_8=$env_8 env_9=$env_9 $extra1; fi
 
 # Database checks
 if [ ! -f $db_rrna ]; then printf "ERROR: Provided rRNA database not found at $db_rrna \nDatabase can be installed by running the workflow with --install_databases option\n" && exit 1; fi
 if [ ! -f $db_gunc ]; then printf "ERROR: Provided GUNC database not found at $db_gunc \nDatabase can be installed by running the workflow with --install_databases option\n" && exit 1; fi
-if [ ! -d $db_kaiju ]; then printf "ERROR: Provided Kaiju database not found at $db_kaiju \nDatabase can be installed by running the workflow with --install_databases option\n" && exit 1; fi
+if [ ! -d $db_metabuli ]; then printf "ERROR: Provided Metabuli database not found at $db_metabuli \nDatabase can be installed by running the workflow with --install_databases option\n" && exit 1; fi
 if [ ! -d $db_gtdb ]; then printf "ERROR: Provided GTDB-tk database not found at $db_gtdb \nDatabase can be installed by running the workflow with --install_databases option\n" && exit 1; fi
 if [ ! -d $db_bakta ]; then printf "ERROR: Provided Bakta database not found at $db_bakta \nDatabase can be installed by running the workflow with --install_databases option\n" && exit 1; fi
 
-# Run snakemake workflow for MAG processing
-if [ ! $rule2 == "OFF" ]; then
+# Run snakemake workflow for MAG analysis
+if [ ! $rule2 == "OFF" ] && [ -f $loc/$sample/results/${sample}_bins.tsv ] && ls $loc/$sample/results/bins/*.fa >/dev/null 2>&1; then
 echo "Starting Snakemake workflow (MAG analysis) for $mode reads and $proc multi-threading instances..."
-singularity_binds="-B $(pwd) -B $TMPDIR -B $(dirname $fastq) -B $(dirname $db_rrna) -B $(dirname $db_gunc) -B $db_bakta -B $db_gtdb -B $db_kaiju"
+singularity_binds="-B $(pwd) -B $TMPDIR -B $(dirname $fastq) -B $loc -B $(dirname $db_rrna) -B $(dirname $db_gunc) -B $db_bakta -B $db_gtdb -B $db_metabuli"
 snakemake $dryrun $touch --software-deployment-method conda $apptainer --apptainer-args "$singularity_binds" --cores $proc --resources usage=100 --rerun-incomplete --nolock -s $snakefile2 --configfile $config2 -R $rule2 --until $rule2 \
-	--config sing=$sing2 sample=$sample loc=$loc fastq=$fastq proc=$proc mode=$mode apptainer_status=$apptainer_status bakta_extra=$bakta_extra db_rrna=$db_rrna db_gunc=$db_gunc db_bakta=$db_bakta db_kaiju=$db_kaiju db_gtdb=$db_gtdb \
-	env_9=$env_9 env_10=$env_10 env_11=$env_11 env_12=$env_12 env_13=$env_13 $extra2; fi
+	--config sing=$sing2 sample=$sample loc=$loc fastq=$fastq proc=$proc mode=$mode cleanup_status=$cleanup_status apptainer_status=$apptainer_status bakta_extra=$bakta_extra  db_rrna=$db_rrna db_gunc=$db_gunc db_bakta=$db_bakta \
+	db_metabuli=$db_metabuli db_gtdb=$db_gtdb env_10=$env_10 env_11=$env_11 env_12=$env_12 env_13=$env_13 env_14=$env_14 $extra2
 
 # Result info for early stoppage
-if [ $stage == "taxonomy" ]; then echo "End of partial workflow. Taxonomy results can be found at $loc/$sample/tmp/taxonomy"; fi
-if [ $stage == "annotation" ]; then echo "End of partial workflow. Annotation results can be found at $loc/$sample/tmp/annotation"; fi
-if [ $stage == "extraqc" ]; then echo "End of partial workflow. Extra QC results can be found at $loc/$sample/tmp/extra_qc"; fi
-if [ $stage == "stats" ]; then echo "End of partial workflow. Read and assembly stats can be found at $loc/$sample/tmp/stats"; fi
+if [ $stage == "taxonomy" ] && [ -f $loc/$sample/tmp/taxa/bins_taxonomy.tsv ]; then
+rsync $loc/$sample/tmp/taxa/bins_taxonomy.tsv $loc/$sample/results/${sample}_bins_taxonomy.tsv
+rsync $loc/$sample/tmp/taxa/contigs_taxonomy.tsv $loc/$sample/results/${sample}_contigs_taxonomy.tsv
+printf "\nEnd of partial genome analysis workflow\nTaxonomy results can be found at:\n$loc/$sample/results/${sample}_bins_taxonomy.tsv\n$loc/$sample/results/${sample}_contigs_taxonomy.tsv\n"; fi
+
+if [ $stage == "annotation" ] && [ -f $loc/$sample/tmp/annotation/bins_annotation.tsv ]; then
+rsync $loc/$sample/tmp/annotation/bins_annotation.tsv $loc/$sample/results/${sample}_bins_annotation.tsv
+printf "\nEnd of partial genome analysis workflow\nAnnotation results can be found at:\n$loc/$sample/results/${sample}_annotation.tsv\n"; fi
+
+if [ $stage == "extraqc" ] && [ -f $loc/$sample/tmp/extra_qc/bins_extraqc.tsv ]; then 
+rsync $loc/$sample/tmp/extra_qc/bins_extraqc.tsv $loc/$sample/results/${sample}_bins_extraqc.tsv
+rsync $loc/$sample/tmp/extra_qc/contigs_extraqc.tsv $loc/$sample/results/${sample}_contigs_extraqc.tsv
+printf "\nEnd of partial genome analysis workflow\nExtra QC results can be found at:\n$loc/$sample/results/${sample}_bins_extraqc.tsv\n$loc/$sample/results/${sample}_contigs_extraqc.tsv\n"; fi
+
+if [ $stage == "stats" ] && [ -f $loc/$sample/tmp/stats/gen_stats.tsv ]; then
+rsync $loc/$sample/tmp/stats/gen_stats.tsv $loc/$sample/results/${sample}_gen_stats.tsv
+rsync $loc/$sample/tmp/stats/contigs_stats.tsv $loc/$sample/results/${sample}_contigs_stats.tsv
+printf "\nEnd of partial genome analysis workflow\nRead and assembly stats can be found at:\n$loc/$sample/results/${sample}_gen_stats.tsv\n$loc/$sample/results/${sample}_contigs_stats.tsv\n"; fi; fi
+
 exit 0
