@@ -8,5 +8,6 @@ dependencies:
   - samtools=1.22
   - seqkit=2.10.0
   - metabat2=2.18
+  - boost=1.85
   - rust=1.88.0
   - cmake
