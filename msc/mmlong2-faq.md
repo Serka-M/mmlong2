@@ -8,7 +8,7 @@
 #### Are there special hardware or software requirements?
 * In general, mmlong2 is designed to be used on HPC clusters with ≥100 CPU cores and ≥300 GB of RAM allocated per workflow run.
 * The metagenomic assembly and binning sections of the workflow can be compute intensive and might take several days to weeks to complete.
-* The mmlong2 workflow has been developed and tested on HPC nodes (Slurm cluster and bare metal) running on Ubuntu 22.04.
+* The mmlong2 workflow has been developed and tested on HPC nodes (both Slurm cluster and bare-metal systems) running Ubuntu 24.04.3 with AMD Zen 5 CPUs.
 * Since mmlong2 uses many software dependencies and databases, it is recommended to consult your server admin about installing the worklfow.
 
 #### Is read data pre-processing required by the workflow?
@@ -19,7 +19,7 @@
 * If you are only interested in recovering microbial genomes, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline that provides an identical prokaryotic genome recovery workflow without requiring large database installation.
 
 #### How were the estimated installation and run times calculated?
-* The ETAs reported in the `README` reflect the time it took us to fully set up and run the pipeline on our compute cluster.
+* The ETAs reported in the `README` reflect the time it took us to fully set up and run the pipeline on our compute cluster (running Ubuntu 24.04.3 with AMD Zen 5 CPUs).
 * Please note that installation and run times may vary depending on the server read/write speeds and the network connection speed to the servers hosting the containers and databases.
 
 #### Which metagenomic assembler should I pick?
