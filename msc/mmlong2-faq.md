@@ -19,7 +19,7 @@
 * If you are only interested in recovering microbial genomes, check out [mmlong2-lite](https://github.com/Serka-M/mmlong2-lite), which is a lightweight version of the pipeline that provides an identical prokaryotic genome recovery workflow without requiring large database installation.
 
 #### How were the estimated installation and run times calculated?
-* The ETAs reported in the `README` reflect the time it took us to fully set up and run the pipeline on our compute cluster (running Ubuntu 24.04.3 with AMD Zen 5 CPUs).
+* The ETAs reported in the `README` reflect the time it took us to fully set up and run the pipeline on our compute cluster (Ubuntu 24.04.3, AMD Zen 5 CPUs).
 * Please note that installation and run times may vary depending on the server read/write speeds and the network connection speed to the servers hosting the containers and databases.
 
 #### Which metagenomic assembler should I pick?
