@@ -66,7 +66,7 @@ To test the workflow in Nanopore mode with the [myloasm](https://www.biorxiv.org
 ```
 mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning -myl
 ```
-Once the run successfully finishes, a directory `mmlong2_testrun_np` can be expected in the current working directory. Inside, a `results` directory with the main pipeline output (described [here](https://github.com/Serka-M/mmlong2/tree/main?tab=readme-ov-file#overview-of-workflow-results)) can be found.
+Once the run successfully finishes, a directory `mmlong2_testrun_np` can be expected in the current working directory. Inside, a `results` directory with the main pipeline output (described [here](https://github.com/Serka-M/mmlong2?tab=readme-ov-file#overview-of-main-output-results-directory)) can be found.
 Users can expect 23 MAGs to be recovered (1 circular, 2 single-contig, 20 multi-contig).
 <br/><br/><br/>
 To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 2 hours, 80 Gb peak RAM):
