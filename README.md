@@ -44,7 +44,7 @@ mmlong2 -h
 ```
 
 ### Databases and bioinformatics software
-Bioinformatic tools and other software dependencies will be automatically installed when running the workflow for the first time (ETA 40 minutes).
+Bioinformatic tools and other software dependencies will be automatically installed when running the workflow for the first time (ETA 25 minutes).
 By default, a pre-built [Singularity](https://docs.sylabs.io/guides/latest/user-guide/) container will be downloaded and set up, although pre-defined Conda environments can also be used by running the workflow with the `--conda_envs_only` setting.
 <br/><br/>
 To acquire prokaryotic genome taxonomy and annotation results, databases are necessary and can be automatically installed by running the following command:
@@ -60,20 +60,20 @@ When running mmlong2 for the first time, it is highly recommended to first perfo
 ```
 zenodo_get -r 12168493
 ```
-For the initial run of the pipeline, please launch only one instance of mmlong2, as to not interfere with the automated dependency installation (ETA 40 minutes).
+For the initial run of the pipeline, please launch only one instance of mmlong2, as to not interfere with the automated dependency installation (ETA 25 minutes).
 <br/><br/><br/>
-To test the workflow in Nanopore mode up until the genome binning completes (ETA 2 hours, 110 Gb peak RAM):
+To test the workflow in Nanopore mode with the [myloasm](https://www.biorxiv.org/content/10.1101/2025.09.05.674543v1) assembler up until the genome binning completes (ETA 35 minutes, 20 Gb peak RAM):
 ```
-mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning
+mmlong2 -np mmlong2_np.fastq.gz -o mmlong2_testrun_np -p 60 -run binning -myl
 ```
 Once the run successfully finishes, a directory `mmlong2_testrun_np` can be expected in the current working directory. Inside, a `results` directory with the main pipeline output (described [here](https://github.com/Serka-M/mmlong2/tree/main?tab=readme-ov-file#overview-of-workflow-results)) can be found.
-Users can expect 19 MAGs to be recovered (4 circular, 1 single-contig, 14 multi-contig).
+Users can expect 23 MAGs to be recovered (1 circular, 2 single-contig, 20 multi-contig).
 <br/><br/><br/>
-To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 4.5 hours, 170 Gb peak RAM):
+To test the workflow in PacBio HiFi mode using [metaMDBG](https://www.nature.com/articles/s41587-023-01983-6) as the assembler and perform genome recovery and analysis (ETA 2 hours, 80 Gb peak RAM):
 ```
 mmlong2 -pb mmlong2_pb.fastq.gz -o mmlong2_testrun_pb -p 60 -dbg
 ```
-A total of 31 MAGs (3 circular, 6 single-contig, 22 multi-contig) should be recovered.
+A total of 32 MAGs (4 circular, 2 single-contig, 26 multi-contig) should be recovered.
 <br/><br/>
 ### Full usage
 ```
