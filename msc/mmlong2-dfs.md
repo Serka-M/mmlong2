@@ -20,6 +20,7 @@
 | contigs_len_min_bp | Length of the shortest contig, reported by Nanoq |
 | contigs_mean_len_bp | Mean contig length, reported by Nanoq |
 | contigs_median_len_bp | Median contig length, reported by Nanoq |
+| mean_cov | Mean contig coverage, reported by Cramino |
 | map_ident_median | Mean read identity (%) to the assembled metagenome, reported by Cramino |
 | map_ident_mean | Median read identity (%) to the assembled metagenome, reported by Cramino |
 | contigs_circ | Number of circular contigs, reported by the assembler |
